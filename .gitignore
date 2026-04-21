@@ -1,0 +1,9 @@
+# Claudian — 実行時セッション状態は環境・時刻固有
+.claudian/sessions/
+
+# Obsidian — 環境固有のワークスペース状態とプラグイン本体
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/workspace.json.bak
+.obsidian/cache/
+.obsidian/plugins/
