@@ -20,7 +20,8 @@ D:\個人研究その2\
 │   │   └── backstory.md              #     前史・起源の空白・探求対象
 │   ├── saku\                          #   久世 朔（主人公）
 │   │   └── profile.md                #     プロフィール・内面・対称構造
-│   └── (幼馴染等: 確定時に追加)
+│   └── aya\                           #   柊木 彩（幼馴染）
+│       └── profile.md                #     プロフィール・話し方・朔との関係
 │
 ├── world\                             # 世界観・関係性
 │   ├── setting.md                     #   舞台・空間・来訪メカニクス
@@ -50,6 +51,7 @@ D:\個人研究その2\
 5. `./characters/observer/vocabulary.md`（語彙・口調）
 6. `./characters/observer/backstory.md`（前史）
 7. `./characters/saku/profile.md`（久世朔）
+7b. `./characters/aya/profile.md`（柊木彩）
 8. `./world/setting.md`（舞台・空間）
 9. `./world/relationship.md`（関係性の現状）
 
