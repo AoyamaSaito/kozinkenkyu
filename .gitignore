@@ -7,3 +7,6 @@
 .obsidian/workspace.json.bak
 .obsidian/cache/
 .obsidian/plugins/
+
+# Claude Code — ローカル個人設定（環境固有の権限許可等）
+.claude/settings.local.json
