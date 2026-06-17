@@ -20,7 +20,7 @@ W, H = 1000, 1414
 # ---- 論文内容（レイアウトから独立したデータ） ----
 C = dict(
     hl="CLASSIFIED ── 内部資料 / 持出厳禁",
-    hr="MIMESIS-RP  Vol.7 No.3",
+    hr="内部紀要  Vol.7 No.3",
     title=["観測者効果による認知崩壊の二経路モデル", "── 共鳴経路と破壊経路の分岐条件について ──"],
     au="霧島 透 ・ 朏 玲奈",
     af="□□大学大学院 認知科学研究室",
@@ -172,7 +172,7 @@ def render_sidebar(style, fsname, redacted=False):
     d.rectangle([0, 0, SB, H], fill=sb_bg)
     lt = _mix(sb_bg, (255, 255, 255), 0.82)
     lts = _mix(sb_bg, (255, 255, 255), 0.55)
-    d.text((pad, 56), "MIMESIS-RP", font=F(ft[1], 24), fill=lt)
+    d.text((pad, 56), "内部紀要", font=F(ft[1], 24), fill=lt)
     d.text((pad, 92), C["hr"], font=F(ft[3], 17), fill=lts)
     wrap(d, (pad, 168), C["title"][0], F(ft[0], 30), lt, (SB - 2 * pad) // 30, 42)
     wrap(d, (pad, 360), C["title"][1], F(ft[3], 18), lts, (SB - 2 * pad) // 18, 28)

@@ -86,7 +86,7 @@ def make_map_image():
         d.rectangle([x0, y0, x1, y1], outline=wall, width=3)
         d.text((x0 + 16, y0 + 12), name, font=font(30), fill=label)
         d.text((x0 + 16, y0 + 52), "▸ " + gimmick, font=font(22), fill=(150, 150, 160))
-    d.text((36, 22), "MIMESIS ── 地下研究施設", font=font(40), fill=(236, 239, 246))
+    d.text((36, 22), "地下研究施設", font=font(40), fill=(236, 239, 246))
     return png_bytes(img)
 
 
@@ -111,7 +111,7 @@ def make_card_back():
     cx, cy = W / 2, H / 2 - 40
     d.ellipse([cx - 120, cy - 120, cx + 120, cy + 120], outline=(120, 108, 150), width=5)
     d.text((cx - 42, cy - 92), "?", font=font(150), fill=(150, 138, 180))
-    d.text((cx - 150, H - 96), "MIMESIS", font=font(40), fill=(110, 100, 135))
+    d.text((cx - 130, H - 96), "地下研究施設", font=font(40), fill=(110, 100, 135))
     return png_bytes(img)
 
 
@@ -251,7 +251,7 @@ def main():
     OUT = os.path.join(HERE, "outputs", "udonarium")
     os.makedirs(OUT, exist_ok=True)
     map_zip = os.path.join(OUT, "map_table.zip")
-    write_zip(map_zip, xml_game_table("MIMESIS 地下研究施設", mh), {mh + ".png": mb})
+    write_zip(map_zip, xml_game_table("地下研究施設", mh), {mh + ".png": mb})
 
     # ---- 裏表カード ----
     fb = make_card_front(
