@@ -713,11 +713,25 @@ await buddyInvestigation(pairs4, 4)
 
 if (await phaseCheckpoint(4)) return makeResult()
 
-// ===== PHASE 5: 固有ターン2 =====
-phase('Phase 5: 固有ターン2')
+// ===== PHASE 5: 第2会議 =====
+phase('Phase 5: 第2会議')
 state.currentPhase = 5
 addToTranscript('\n' + '==================================================')
-addToTranscript('  Phase 5: 固有ターン2')
+addToTranscript('  Phase 5: 第2会議')
+addToTranscript('==================================================')
+
+await discussion(
+  '第2調査の結果を共有しましょう。各ペアが発見したこと、気づいたことを報告してください。\n特に: 自動認証扉の反応、金庫の中身、崩壊痕跡の詳細、走査装置のログなど。',
+  5
+)
+
+if (await phaseCheckpoint(5)) return makeResult()
+
+// ===== PHASE 6: 固有ターン2 =====
+phase('Phase 6: 固有ターン2')
+state.currentPhase = 6
+addToTranscript('\n' + '==================================================')
+addToTranscript('  Phase 6: 固有ターン2')
 addToTranscript('==================================================')
 
 await privateTurn('folklorist', 'スキルは発動済みです。現在の情報を整理し、もう1体が誰かの推理を進めてください。')
@@ -739,26 +753,26 @@ await privateTurn('professor', profMsg5)
 // 院生: 覗き見2回目
 await handlePeek()
 
-if (await phaseCheckpoint(5)) return makeResult()
-
-// ===== PHASE 6: 最終調査 =====
-phase('Phase 6: 最終調査')
-state.currentPhase = 6
-addToTranscript('\n' + '==================================================')
-addToTranscript('  Phase 6: 最終調査')
-addToTranscript('==================================================')
-
-var pairs6 = [['folklorist', 'student'], ['investigator', 'professor']]
-addToTranscript('バディ: ' + DISPLAY[pairs6[0][0]] + '&' + DISPLAY[pairs6[0][1]] + '、' + DISPLAY[pairs6[1][0]] + '&' + DISPLAY[pairs6[1][1]])
-await buddyInvestigation(pairs6, 6)
-
 if (await phaseCheckpoint(6)) return makeResult()
 
-// ===== PHASE 7: 最終会議＋投票 =====
-phase('Phase 7: 最終会議+投票')
+// ===== PHASE 7: 最終調査 =====
+phase('Phase 7: 最終調査')
 state.currentPhase = 7
 addToTranscript('\n' + '==================================================')
-addToTranscript('  Phase 7: 最終会議＋投票')
+addToTranscript('  Phase 7: 最終調査')
+addToTranscript('==================================================')
+
+var pairs7 = [['folklorist', 'student'], ['investigator', 'professor']]
+addToTranscript('バディ: ' + DISPLAY[pairs7[0][0]] + '&' + DISPLAY[pairs7[0][1]] + '、' + DISPLAY[pairs7[1][0]] + '&' + DISPLAY[pairs7[1][1]])
+await buddyInvestigation(pairs7, 7)
+
+if (await phaseCheckpoint(7)) return makeResult()
+
+// ===== PHASE 8: 最終会議＋投票 =====
+phase('Phase 8: 最終会議+投票')
+state.currentPhase = 8
+addToTranscript('\n' + '==================================================')
+addToTranscript('  Phase 8: 最終会議＋投票')
 addToTranscript('==================================================')
 
 await discussion(
@@ -773,7 +787,7 @@ var votes = await parallel(ROLES.map(function (role) {
     return agent(buildPlayerPrompt(role,
       '【最終投票】封印装置に送り込む対象を1人選んでください。\n候補: 民俗学者(folklorist)、調査隊員(investigator)、大学教授(professor)、大学院生(student)\n自分自身も候補に含まれます。\n投票先を選び、理由と投票宣言を述べてください。'), {
       label: 'vote:' + DISPLAY[role],
-      phase: 'Phase 7: 最終会議+投票',
+      phase: 'Phase 8: 最終会議+投票',
       schema: VOTE_SCHEMA,
       model: 'sonnet',
       effort: 'high',
@@ -801,13 +815,13 @@ var sorted = Object.keys(tally).sort(function (a, b) { return tally[b] - tally[a
 var sealed = sorted[0]
 addToTranscript('  ★ 封印対象: ' + DISPLAY[sealed])
 
-if (await phaseCheckpoint(7)) return makeResult()
+if (await phaseCheckpoint(8)) return makeResult()
 
-// ===== PHASE 8: エンディング =====
-phase('Phase 8: エンディング')
-state.currentPhase = 8
+// ===== PHASE 9: エンディング =====
+phase('Phase 9: エンディング')
+state.currentPhase = 9
 addToTranscript('\n' + '==================================================')
-addToTranscript('  Phase 8: エンディング')
+addToTranscript('  Phase 9: エンディング')
 addToTranscript('==================================================')
 
 var outcome = ''
@@ -846,7 +860,7 @@ for (var fi = 0; fi < ROLES.length; fi++) {
 // 11. ログ書出し＋結果返却
 // ================================================================
 
-await writePhaseLog('Phase_0-8_full')
+await writePhaseLog('Phase_0-9_full')
 
 var resultVotes = {}
 for (var rk = 0; rk < tallyKeys.length; rk++) {
