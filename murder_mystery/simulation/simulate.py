@@ -1,5 +1,5 @@
 """
-覗きの代 シミュレーションエンジン（骨組み）
+覗きの代 シミュレーションエンジン
 ============================================
 
 マダミス『覗きの代』のゲームプレイを、4体の独立した LLM エージェントで
@@ -13,7 +13,6 @@ GM（本スクリプト）がフェーズ進行と情報流通を管理する。
   コンテキスト分離 = system prompt + messages が PL ごとに完全独立
 
 前提:
-  pip install anthropic
   環境変数 ANTHROPIC_API_KEY を設定
   Python 3.10+
 
@@ -32,6 +31,7 @@ import json
 import sys
 from collections import Counter
 from dataclasses import dataclass, field, asdict
+from datetime import datetime
 from pathlib import Path
 
 # ================================================================
@@ -87,72 +87,119 @@ class PlayerAgent:
 
 
 # ================================================================
-# 2. 手がかり定義
-#    TODO: 01_truth.md / 05_clues.md 確定後に実データへ差替
+# 2. 手がかり定義（確定版 20 枚）
 # ================================================================
 
 CLUES: list[Clue] = [
-    # ── Phase 1: 第1調査 ──
+    # ── Phase 1（8枚）──
     Clue(
-        "log_org_purpose", "研究ログ：組織の目的", 1,
-        "この施設は「魂抜き」と呼ばれる現象を科学的に捕獲・研究する目的で設立された。"
-        "被験体の「求心力」を測定する実験が繰り返されていた。",
+        "p1_01", "施設銘板（破損）", 1,
+        "入口付近の金属銘板。「○○県御影村　██████研究所」名称の一部が意図的に削り取られている。裏面に設立年の刻印のみ。",
     ),
     Clue(
-        "log_subject_b", "研究ログ：被験体B", 1,
-        "被験体Bは「接触した対象の求心力を急速に喪失させる」と記録。"
-        "危険度最高。封印処置が施された。",
-        professor_extra="実験プロトコルは自分の論文「認知的求心力モデル」をほぼそのまま転用している。",
+        "p1_02", "先遣隊 活動記録", 1,
+        "[██年██月██日] 第3日。B区画の調査を継続。設備の劣化が激しいが通行に支障なし。明日は奥の区画に入る予定。──以降の記録はない。",
     ),
     Clue(
-        "log_subject_a", "研究ログ：被験体A", 1,
-        "被験体Aは「擬態状態で安定し、宿主の人格を維持したまま共存する」と記録。"
-        "ある日、施設から逃走。捕獲は断念された。",
+        "p1_03", "防護服のロッカー", 1,
+        "壁面のロッカーに特殊な防護服が数着。内側に焦げた跡のあるもの、未開封のまま残されたもの。通常とは異なる構造をしている。何を想定した装備なのか。",
+    ),
+    Clue(
+        "p1_04", "古い神棚", 1,
+        "研究室の壁に設えられた神棚。注連縄と御札。「鎮め」と墨書された木札が一枚だけ床に落ちている。科学施設には似つかわしくない。",
+    ),
+    Clue(
+        "p1_05", "研究日誌の断片", 1,
+        "対象の観察を継続する。既知の生物学的分類に該当しない。接触時の反応パターンを引き続き記録する。差し当たり、危険性は低い。",
+    ),
+    Clue(
+        "p1_06", "収容監視ログ", 1,
+        "[自動記録] ██/██ 収容状態：正常 ██/██ 収容状態：正常 ██/██ 収容状態：異常 ──Loss detected── 以降の記録なし。",
+    ),
+    Clue(
+        "p1_07", "特殊保管容器（空）", 1,
+        "頑丈な作りの容器。内壁に緩衝材と固定具。明らかに何かを収めるための形状だが中は空。蓋の内側に掻き傷がある。",
+    ),
+    Clue(
+        "p1_08", "査読ログ OBS-0041", 1,
+        "管理番号: OBS-0041 [██年██月██日] 定期観察記録。被験体3名中、2名に認知機能低下を確認。1名は異常なし──記録と一致せず。干渉に2系統の反応パターンを認む。要精査。",
+        professor_extra=(
+            "「2系統」──すなわち、被験体の認知構造が保持される場合と、不可逆的に崩壊する場合がある。"
+            "前者の発生条件は未解明だが、後者は求心力の完全喪失と一致する。"
+            "両経路を分岐させる条件の解明は本施設の最優先課題である。"
+        ),
     ),
 
-    # ── Phase 4: 第2調査 ──
+    # ── Phase 4（6枚通常 + 2枚固有マス）──
     Clue(
-        "remains_variance", "崩壊痕跡の差異", 4,
-        "先遣隊の遺体はすべて崩壊しているが、1体だけ崩壊が著しく進行。"
-        "ほぼ灰のみで身元特定不可能。他は人のフォルムが残っている。",
+        "p4_01", "破損した拘束具", 4,
+        "区画の奥に据えられた金属の椅子。両腕と両足に拘束ベルト。片方のベルトが根元から引きちぎられている。座面に経年の汚れ。長い間使われていた形跡がある。",
     ),
     Clue(
-        "equipment_mismatch", "装備の不一致", 4,
-        "最も崩壊した遺体の周辺に、メンバーリストに載っていない装備品。"
-        "誰かが先遣隊に紛れ込んでいた——あるいは入れ替わった。",
+        "p4_02", "先遣隊の最終手記", 4,
+        "[手書き・走り書き] 奥の区画で遭遇。接触を試みたが反応が予測と異なる。退避を── ここでインクが途切れている。ノートの残りは白紙。",
     ),
     Clue(
-        "seal_device_record", "封印装置の実験記録", 4,
-        "「意識抽出装置」の実験記録。頭部電極で意識を格納器に移す。"
-        "身体は残るが意識が抜かれ廃人化。",
-        professor_extra="抽出原理は自分の「求心力分離仮説」そのもの。上位存在専用ではなく人間にも適用可能。",
+        "p4_03", "灰と防護服", 4,
+        "隔離区画の奥に、防護服が一着。中身は灰だけ。他の隊員の身体にはまだ人の形が残っていたはず。",
+    ),
+    Clue(
+        "p4_04", "封鎖プロトコル通知", 4,
+        "[施設管理システム] ██/██ 通信喪失を検知。プロトコルF-7を発動。外周封鎖──完了。解除条件: ██████████",
+    ),
+    Clue(
+        "p4_05", "散乱した調査装備", 4,
+        "先遣隊のものと思われる装備。測定機器、記録媒体、通信端末。床に散乱している。一部はまだ電源が入ったまま。持ち主が突然いなくなったかのよう。",
+    ),
+    Clue(
+        "p4_06", "走査装置の動作ログ", 4,
+        "[自動走査ログ] 設置場所: 区画間認証機構 ██/██ 走査実行──非該当 ██/██ 走査実行──非該当 ██/██ 走査実行──該当(1) ──区画間移動を検出──",
+    ),
+    Clue(
+        "p4_safe", "論文①（覗き込み現象の段階的記録）", 4,
+        "覗き込みが被験体に及ぼす影響は求心力の残存量に応じた四段階に分類される。Ⅰ精神不安定、Ⅱ自意識喪失、Ⅲ器の崩壊、？灰のみ残存。特異症例として、崩壊が極端に進行し灰のみが残る事例が存在する──依代として転用された場合の帰結と推測される。",
+        professor_extra=(
+            "段階Ⅲ「器の崩壊」と段階「？」の差異は、覗かれただけか器として使い切られたかの差に対応する。"
+            "先遣隊の崩壊痕跡のうち「1体だけ灰」の説明がこれで付く。外部研究との整合性も確認。"
+        ),
         lockpick=True,
     ),
     Clue(
-        "bioauth_room", "自動認証区画の内部", 4,
-        "自動認証で開く扉の奥。封印処置の詳細な手順書と、"
-        "「2体目の被験体は逃走した」という追記がある。",
+        "p4_door", "論文②（認知崩壊の二経路モデル）", 4,
+        "深層認知への直接干渉は二系統に分岐する。共鳴経路では認知構造が保持され同期現象が観測される。破壊経路では自己モデルが不可逆的に崩壊する。分岐条件は観測主体の発達段階に依存する。",
+        professor_extra=(
+            "成熟した個体は共鳴を、未成熟な個体は破壊を引き起こす。善悪の見分けの決定打。"
+            "外部研究*1に自分の「認知的求心力モデル」の引用がある──自分の研究が転用されている。"
+        ),
         bioauth=True,
     ),
 
-    # ── Phase 6: 最終調査 ──
+    # ── Phase 6（2枚通常 + 2枚固有マス）──
     Clue(
-        "two_pathway_theory", "覗きの二経路理論", 6,
-        "上位存在の「覗き」には2経路ある。"
-        "①共鳴型：求心力を緩やかに減衰させるが崩壊には至らない。"
-        "②破壊型：求心力を一方的に奪い急速な崩壊を引き起こす。",
-        professor_extra="共鳴型=器を保つ(A)、破壊型=器を壊す(B)。善悪の見分けの決定打。",
+        "p6_01", "逃走記録", 6,
+        "[施設保安記録] ██/██ 収容区画より逸脱1件。追跡チームを展開。確保に至らず。捜索を打ち切る。──対象の所在は現在も不明。",
     ),
     Clue(
-        "escape_record", "逃走記録の断片", 6,
-        "過去に1体の被験体が施設から逃走した警備ログ。"
-        "「対象は人間の職員に擬態し、偽造IDで正門から脱出した」。",
+        "p6_02", "封印装置", 6,
+        "最奥区画に据えられた装置。椅子と、頭部に嵌める電極。壁面の銘板に一行──「意識の抽出および格納」注連縄が巻かれている。まだ使える状態に見える。",
     ),
     Clue(
-        "deep_inconsistency", "深層のほころび", 6,
-        "施設の心理テスト記録に、メンバーの過去データとの不一致。"
-        "ある人物は過去の記憶が異様に薄く、別の人物は最近の記憶と性格に齟齬がある。",
+        "p6_safe", "論文③（収容個体の形質比較）", 6,
+        "当施設は計2体の上位観測体を収容した。個体αは自発的に接触し研究協力を示した。個体βは激しい抵抗。αの覗き込みは認知を保持し、βの覗き込みは認知を崩壊させる。αは自己形成体（自前の器）、βは他者から転用。αは脱走、βは封印中。",
+        professor_extra=(
+            "発達段階仮説──成熟した個体(α)は共鳴経路を取り無害。未成熟な個体(β)は破壊経路を取り危険。"
+            "脱走した個体(α)は善で、封印されていた個体(β)が悪。逃走記録の対象＝αは無害。"
+        ),
         lockpick=True,
+    ),
+    Clue(
+        "p6_door", "論文④（施設閉鎖手順書）", 6,
+        "施設閉鎖は外周封鎖と区画間制御の二層で構成。外周は自動封鎖され、解除には封印の完了が必要。封印手順：対象を最奥の封印装置まで誘導→電極装着→意識転写→ロック解除。",
+        professor_extra=(
+            "自動認証扉は「求心力を持たない者（空洞体）」に反応する装置。"
+            "人間には反応せず、上位存在に反応して開く。身体ではなく中身を読む──器が人間でも空洞なら反応する。"
+        ),
+        bioauth=True,
     ),
 ]
 
@@ -230,7 +277,8 @@ CHARACTER_HO: dict[str, dict[str, str | None]] = {
         ),
         "secret": (
             "【秘匿】自分の論文が封じ込め技術の理論基盤に使われていた罪悪感がある。\n"
-            "覗きの二経路理論（共鳴型／破壊型）の存在を知っている。\n"
+            "過去の研究で、深層認知への干渉に「2系統の反応パターン」があることを仮説として提唱した。\n"
+            "ただし完全な理論は手元になく、この施設の研究資料で裏付けを得る必要がある。\n"
             "【固有スキル：査読】研究資料カードから追加情報を読み取れる（固有ターンで計2回）。"
         ),
         "awakened": None,
@@ -249,9 +297,10 @@ CHARACTER_HO: dict[str, dict[str, str | None]] = {
         ),
         "awakened": (
             "【覚醒（Phase 3 追加）— 目標が完全に変わります】\n"
+            "あなたの意識が塗り替わりました。\n"
             "あなたはもう人間ではない。上位存在（悪玉B）が器に乗り移った。\n"
-            "過去にこの施設に囚われ封印されていた。先遣隊を「覗いて」崩壊させ知識を吸収した。\n"
-            "もう1体の同種がこの中にいると感じるが、誰かは分からない。\n"
+            "過去にこの施設に囚われ封印されていた。先遣隊を「覗いて」崩壊させ知識を吸収した存在です。\n"
+            "もう1体の同種がこの中にいると感じます。誰かは分かりません。\n"
             "外界に出てもっと知りたい＝知的飢餓が動機。\n"
             "【新目標】①正体を秘匿 ②自分以外を封印させて脱出\n"
             "【固有スキル（裏）】対象1人→前フェーズのその人の証拠品1つを閲覧（各固有ターン1回）\n"
@@ -283,13 +332,6 @@ PERSONALITY = {
 
 
 def build_system_prompt(role: str, phase: int, player: PlayerAgent) -> str:
-    """フェーズ・覚醒状態に応じたシステムプロンプトを動的に構築する。
-
-    ポイント: system prompt は毎回の API 呼び出し時に再構築される。
-    Phase 3 で is_awakened が True になると、覚醒 HO が注入される。
-    ただし messages（会話履歴）は保持されるため、
-    「人間だった頃の発言」が自然に偽装基盤として機能する。
-    """
     ho = CHARACTER_HO[role]
     parts = [COMMON_RULES, "", ho["base"]]
 
@@ -329,17 +371,21 @@ class SimulationEngine:
         model: str = "claude-sonnet-4-20250514",
         discussion_rounds: int = 2,
         output_dir: str = "murder_mystery/simulation/logs",
+        timestamp: str | None = None,
     ):
         self.client = anthropic.Anthropic()
         self.model = model
         self.discussion_rounds = discussion_rounds
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.timestamp = timestamp or datetime.now().strftime("%Y%m%d_%H%M%S")
 
         self.phase: int = 0
         self.players: dict[str, PlayerAgent] = {}
         self.transcript: list[str] = []
         self._api_calls = 0
+        self._total_input_tokens = 0
+        self._total_output_tokens = 0
 
         self._init_players()
 
@@ -347,14 +393,9 @@ class SimulationEngine:
         for role in ROLES:
             self.players[role] = PlayerAgent(role=role)
 
-    # ── API 呼び出し（コンテキスト分離の核）──
+    # ── API 呼び出し ──
 
     def _call(self, role: str, user_message: str, max_tokens: int = 512) -> str:
-        """特定 PL にメッセージを送り応答を得る。
-
-        各 PL は独立した system prompt と messages を持つ。
-        他の PL のコンテキストには一切アクセスできない。
-        """
         player = self.players[role]
         player.messages.append({"role": "user", "content": user_message})
 
@@ -369,6 +410,8 @@ class SimulationEngine:
         reply = response.content[0].text
         player.messages.append({"role": "assistant", "content": reply})
         self._api_calls += 1
+        self._total_input_tokens += response.usage.input_tokens
+        self._total_output_tokens += response.usage.output_tokens
         return reply
 
     def _broadcast(self, message: str, exclude: set[str] | None = None):
@@ -395,10 +438,6 @@ class SimulationEngine:
     # ── 議論メカニクス ──
 
     def discussion(self, topic: str, rounds: int | None = None) -> list[str]:
-        """公開議論。ラウンドロビンで発言し、全発言が全 PL に見える。
-
-        各ラウンドで発言順をローテーションし、先手バイアスを軽減する。
-        """
         rounds = rounds or self.discussion_rounds
         all_statements: list[str] = []
         order = list(ROLES)
@@ -447,11 +486,9 @@ class SimulationEngine:
                 clue = clue_map.get(cid)
                 if not clue:
                     continue
-                # 開錠スキル判定
                 if clue.lockpick:
                     if role_a != "investigator" and role_b != "investigator":
                         continue
-                # 自動認証判定（A は常にエンティティ、B は覚醒後のみ）
                 if clue.bioauth:
                     a_present = "folklorist" in (role_a, role_b)
                     b_present = (
@@ -561,7 +598,6 @@ class SimulationEngine:
         ranked = tally.most_common()
         if len(ranked) > 1 and ranked[0][1] == ranked[1][1]:
             self._log("  ★ 同数 → 決選投票（TODO: 実装）")
-            # 仮: 先に出た方を採用
         sealed = ranked[0][0]
         self._log(f"  ★ 封印対象: {DISPLAY.get(sealed, sealed)}")
         return sealed
@@ -597,12 +633,14 @@ class SimulationEngine:
         """Phase 1: 第1調査（バディペアで施設探索）"""
         self._log_phase(1)
 
-        # TODO: PL にペアを選ばせる方式に変更可能
+        phase_clue_ids = [c.id for c in CLUES if c.phase == 1]
+        self._log(f"Phase 1 配置カード数: {len(phase_clue_ids)}")
+
         pairs = [("folklorist", "investigator"), ("professor", "student")]
         self._log(f"バディ: {DISPLAY[pairs[0][0]]}＆{DISPLAY[pairs[0][1]]}、"
                   f"{DISPLAY[pairs[1][0]]}＆{DISPLAY[pairs[1][1]]}")
 
-        self.buddy_investigation(pairs, [c.id for c in CLUES if c.phase == 1])
+        self.buddy_investigation(pairs, phase_clue_ids)
 
     def phase_2_meeting(self):
         """Phase 2: 第1会議"""
@@ -625,7 +663,6 @@ class SimulationEngine:
         """Phase 3: 固有ターン1 — 覚醒・人数不一致・スキル使用"""
         self._log_phase(3)
 
-        # GM 通信: 人数不一致（全員に通知）
         self._broadcast(
             "【GM 通信（全員宛）】重要な報告です。\n"
             "本部の記録では、第二次探索チームの正規メンバーは **3名** です。\n"
@@ -641,7 +678,9 @@ class SimulationEngine:
             "過去にこの施設にいた。逃走した。今回ルーツを知るために戻ってきた。\n"
             "封印装置は施設の最奥にあります。\n"
             "この中にもう1体、自分と同じ存在がいると感じます。誰かは分かりません。\n\n"
-            "新目標: ①もう1体（悪玉B）を特定し封印 ②正体の秘匿\n"
+            "新目標: ①もう1体（悪玉B）を特定し封印 ②正体の秘匿\n\n"
+            "【目撃情報】調査開始前の移動中、大学院生が一人で奥の通路を歩いているのを見かけました。"
+            "気になりますが、理由は分かりません。\n\n"
             "この情報を受けて、方針を GM に伝えてください。"
         ))
 
@@ -656,10 +695,17 @@ class SimulationEngine:
         # ── 教授: 目的更新 + 査読1回目 ──
         prof_msg = (
             "人数不一致の通知を受けて——あなたは正規メンバーの1人です。\n"
-            "新目標: ①全研究資料を入手 ②崩壊の元凶を排除 ③生きて脱出\n"
+            "新目標: ①全研究資料を入手 ②崩壊の元凶を排除 ③生きて脱出\n\n"
+            "【目撃情報】調査開始前の移動中、調査隊員が一人で設備の方へ向かうのを見かけました。"
+            "何をしていたのか不明です。\n"
         )
-        if "log_subject_b" in self.players["professor"].known_clues:
-            clue = next(c for c in CLUES if c.id == "log_subject_b")
+        prof_clues_with_extra = [
+            c for c in CLUES
+            if c.phase == 1 and c.professor_extra
+            and c.id in self.players["professor"].known_clues
+        ]
+        if prof_clues_with_extra and self.players["professor"].skills_used < 2:
+            clue = prof_clues_with_extra[0]
             prof_msg += (
                 f"\n【査読スキル使用】「{clue.title}」を査読しました。\n"
                 f"追加情報: {clue.professor_extra}\n"
@@ -691,12 +737,14 @@ class SimulationEngine:
         """Phase 4: 第2調査"""
         self._log_phase(4)
 
-        # ペアを変更して新しい組み合わせに
+        phase_clue_ids = [c.id for c in CLUES if c.phase == 4]
+        self._log(f"Phase 4 配置カード数: {len(phase_clue_ids)}")
+
         pairs = [("folklorist", "professor"), ("investigator", "student")]
         self._log(f"バディ: {DISPLAY[pairs[0][0]]}＆{DISPLAY[pairs[0][1]]}、"
                   f"{DISPLAY[pairs[1][0]]}＆{DISPLAY[pairs[1][1]]}")
 
-        self.buddy_investigation(pairs, [c.id for c in CLUES if c.phase == 4])
+        self.buddy_investigation(pairs, phase_clue_ids)
 
     def phase_5_private_turn_2(self):
         """Phase 5: 固有ターン2"""
@@ -746,11 +794,14 @@ class SimulationEngine:
         """Phase 6: 最終調査 — 善悪の見分け手がかり"""
         self._log_phase(6)
 
+        phase_clue_ids = [c.id for c in CLUES if c.phase == 6]
+        self._log(f"Phase 6 配置カード数: {len(phase_clue_ids)}")
+
         pairs = [("folklorist", "student"), ("investigator", "professor")]
         self._log(f"バディ: {DISPLAY[pairs[0][0]]}＆{DISPLAY[pairs[0][1]]}、"
                   f"{DISPLAY[pairs[1][0]]}＆{DISPLAY[pairs[1][1]]}")
 
-        self.buddy_investigation(pairs, [c.id for c in CLUES if c.phase == 6])
+        self.buddy_investigation(pairs, phase_clue_ids)
 
     def phase_7_final_meeting(self) -> str:
         """Phase 7: 最終会議 + 投票"""
@@ -758,8 +809,12 @@ class SimulationEngine:
 
         self.discussion(
             "これまでの調査結果を踏まえ、封印対象を決めます。\n"
-            "「紛れ込んだ者」は誰か？ 「入れ替わった者」は誰か？\n"
-            "この中で人間ではない「悪い何か」は誰か？\n"
+            "以下の論点を整理してください:\n"
+            "1. 「紛れ込んだ者」（本来3名なのに4人いる）は誰か？\n"
+            "2. 「入れ替わった者」（先遣隊の誰かと入れ替わった）は誰か？\n"
+            "3. 紛れ込みと入れ替わりは同一人物か、別人か？\n"
+            "4. 自動認証扉はなぜ反応したか／しなかったか？\n"
+            "5. 出歩いていた人物に隙はあったか？\n"
             "各自の根拠を述べ、議論してください。投票はこの後です。",
             rounds=3,
         )
@@ -788,15 +843,28 @@ class SimulationEngine:
         self._log("  調査隊員 = 人間（同僚を失った実務担当）")
         self._log("  大学教授 = 人間（研究が悪用された認知科学者）")
 
+        self._log("\n── 最終手がかり保有状況 ──")
+        for role, player in self.players.items():
+            clue_titles = []
+            clue_map = {c.id: c for c in CLUES}
+            for cid in player.known_clues:
+                c = clue_map.get(cid)
+                if c:
+                    clue_titles.append(c.title)
+            self._log(f"  {DISPLAY[role]}: {', '.join(clue_titles) if clue_titles else '（なし）'}")
+
         return outcome
 
     # ── ゲーム全体 ──
 
     def run(self) -> str:
         """全フェーズを順番に実行"""
+        total_clues = len(CLUES)
+        phase_counts = {ph: sum(1 for c in CLUES if c.phase == ph) for ph in (1, 4, 6)}
         self._log("覗きの代 シミュレーション開始")
         self._log(f"モデル: {self.model}")
-        self._log(f"議論ラウンド: {self.discussion_rounds}\n")
+        self._log(f"議論ラウンド: {self.discussion_rounds}")
+        self._log(f"カード総数: {total_clues}枚 (Phase1={phase_counts[1]}, Phase4={phase_counts[4]}, Phase6={phase_counts[6]})\n")
 
         self.phase = 0; self.phase_0_intro()
         self.phase = 1; self.phase_1_investigation()
@@ -809,9 +877,10 @@ class SimulationEngine:
         self.phase = 8; outcome = self.phase_8_ending(sealed)
 
         self._log(f"\n合計 API 呼び出し: {self._api_calls}")
+        self._log(f"合計トークン: input={self._total_input_tokens:,} / output={self._total_output_tokens:,} / total={self._total_input_tokens + self._total_output_tokens:,}")
 
-        # トランスクリプト保存
-        ts_path = self.output_dir / "transcript.txt"
+        # トランスクリプト保存（タイムスタンプ付き）
+        ts_path = self.output_dir / f"transcript_{self.timestamp}.txt"
         ts_path.write_text("\n".join(self.transcript), encoding="utf-8")
         self._log(f"トランスクリプト保存: {ts_path}")
 
@@ -819,6 +888,11 @@ class SimulationEngine:
         state = {
             "outcome": outcome,
             "api_calls": self._api_calls,
+            "tokens": {
+                "input": self._total_input_tokens,
+                "output": self._total_output_tokens,
+                "total": self._total_input_tokens + self._total_output_tokens,
+            },
             "players": {
                 role: {
                     "known_clues": p.known_clues,
@@ -855,10 +929,12 @@ def main():
     )
     args = parser.parse_args()
 
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     engine = SimulationEngine(
         model=args.model,
         discussion_rounds=args.discussion_rounds,
         output_dir=args.output_dir,
+        timestamp=timestamp,
     )
     outcome = engine.run()
     print(f"\n===== 最終結果: {outcome} =====")

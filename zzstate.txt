@@ -1,0 +1,6 @@
+﻿ROOT:
+.gitignore, CLAUDE.md, verify_result.txt, zzstate.txt
+UDON_TEST:
+extract_samples.py, zz_after.txt, zz_buildlog.txt
+C_UDON_SRC:
+False
