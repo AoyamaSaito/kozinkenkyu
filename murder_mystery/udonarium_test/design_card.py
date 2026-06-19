@@ -1892,8 +1892,8 @@ def make_rules():
 
 
 def make_phase_bar():
-    """フェイズ進行表。1200×160横長帯。"""
-    W, H = 1200, 160
+    """フェイズ進行表。1400×160横長帯。"""
+    W, H = 1400, 160
     bg = (14, 17, 26)
     line_col = (224, 228, 236)
     gold = (202, 170, 104)
@@ -1909,17 +1909,18 @@ def make_phase_bar():
         ("P2", "第1会議",  "〜1:10"),
         ("P3", "固有1",    "〜1:25"),
         ("P4", "第2調査",  "〜1:55"),
-        ("P5", "固有2",    "〜2:10"),
-        ("P6", "最終調査", "〜2:30"),
-        ("P7", "会議+投票","〜2:50"),
-        ("P8", "ED",       "〜3:00"),
+        ("P5", "第2会議",  "〜2:10"),
+        ("P6", "固有2",    "〜2:25"),
+        ("P7", "最終調査", "〜2:45"),
+        ("P8", "会議+投票","〜3:05"),
+        ("P9", "ED",       "〜3:15"),
     ]
     n = len(phases)
     cell_w = W // n
 
     for i, (pno, pname, ptime) in enumerate(phases):
         x0 = i * cell_w
-        is_fixed = i in (3, 5)
+        is_fixed = i in (3, 6)
         col = shu if is_fixed else _mix(bg, line_col, 0.12)
         d.rectangle([x0, 0, x0 + cell_w - 2, H], fill=col)
         cx = x0 + cell_w // 2
@@ -1929,7 +1930,7 @@ def make_phase_bar():
                pno, font=F("goth_b", 36), fill=pno_col)
         d.text((cx - d.textlength(pname, font=F("mincho", 22)) / 2, 54),
                pname, font=F("mincho", 22), fill=name_col)
-        time_col = (240, 230, 220) if i in (3, 5) else _mix(bg, gold, 0.7)
+        time_col = (240, 230, 220) if i in (3, 6) else _mix(bg, gold, 0.7)
         d.text((cx - d.textlength(ptime, font=F("goth_m", 18)) / 2, 102),
                ptime, font=F("goth_m", 18), fill=time_col)
 
@@ -2049,7 +2050,7 @@ if __name__ == "__main__":
         variant="ofuda", header="物的証拠").save(os.path.join(OUT, "final_front_evidence.png"))
     make_evidence_card_wa(   # 書類・ログ系（施設記録＝罫線紙＋等幅＋綴じ穴）
         5, "先遣隊 活動記録",
-        "[██年██月██日]\n第3日。B区画の調査を継続。\n設備の劣化が激しいが\n通行に支障なし。\n明日は奥の区画に入る予定。\n\n──以降の記録はない。",
+        "[██年5月12日]\n第3日。B区画の調査を継続。\n設備の劣化が激しいが\n通行に支障なし。\n明日は奥の区画に入る予定。\n\n──以降の記録はない。",
         variant="log", header="記録", prefix="L").save(os.path.join(OUT, "final_front_log.png"))
     make_evidence_card_wa(   # 研究資料（固有デザイン＝藍枠の綴じ文書）＋末尾に「より詳しく…」の含み
         1, "二経路モデル",
