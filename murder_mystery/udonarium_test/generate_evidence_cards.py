@@ -57,8 +57,8 @@ P4 = [
          variant="log", header="記録", prefix="L"),
 
     # shock card
-    dict(no=11, title="灰と防護服",
-         body="隔離区画の奥に、防護服が一着。\n中身は灰だけ。\n他の隊員の身体には\nまだ人の形が残っていたはず。",
+    dict(no=11, title="灰の残骸",
+         body="隔離区画の奥に、灰の塊。\n先遣隊と違い、\n人の原型すらとどめていない。\nただの灰。",
          shock=True, header="物的証拠", prefix="C"),
 
     dict(no=12, title="封鎖プロトコル通知",

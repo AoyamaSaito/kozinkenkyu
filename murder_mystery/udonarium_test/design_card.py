@@ -858,33 +858,42 @@ def make_shock_card(no, title, body, header="物的証拠", prefix="C"):
     d.text((80, 216), "状態: 異常   保管区分: ──",
            font=F("ms_goth", 16), fill=_mix(p1, ash, 0.4))
 
-    # ── イラスト（元版のまま） ──
+    # ── イラスト（灰の塊 — 人型なし） ──
     cx = W // 2
-    icx = cx
-    d.ellipse([icx - 58, 244, icx + 58, 360], outline=suit, width=4)
-    d.rounded_rectangle([icx - 38, 282, icx + 38, 334], radius=14,
-                        fill=(24, 26, 30), outline=suit, width=3)
-    d.line([(icx - 80, 380), (icx + 80, 380)], fill=suit, width=4)
-    d.line([(icx - 80, 380), (icx - 66, 476)], fill=suit, width=4)
-    d.line([(icx + 80, 380), (icx + 66, 476)], fill=suit, width=4)
-    d.line([(icx - 78, 386), (icx - 110, 484)], fill=suit, width=4)
-    d.line([(icx + 78, 386), (icx + 110, 484)], fill=suit, width=4)
-    for sx in range(icx - 66, icx + 67, 15):
-        d.line([(sx, 476), (sx + 7, 476)], fill=suit, width=3)
     pile = random.Random(5)
-    for _ in range(120):
-        py = pile.randint(476, 540)
-        spread = 34 + (py - 476) * 1.9
-        px = icx + pile.uniform(-spread, spread)
-        r = pile.uniform(6, 19)
-        g = pile.randint(120, 196)
-        d.ellipse([px - r, py - r * 0.7, px + r, py + r * 0.7],
+    # 灰の山 — 底部から積み上げる不定形の楕円群
+    for i in range(10):
+        y_c = 490 - i * 20
+        w_h = 110 - i * 6
+        h_h = 22 - i
+        g = 95 + i * 8
+        d.ellipse([cx - w_h, y_c - h_h, cx + w_h, y_c + h_h],
                   fill=(g, g - 6, g - 16))
-    for _ in range(140):
-        px = icx + pile.uniform(-140, 140)
-        py = pile.randint(400, 536)
+    # 表面の粒子 — 不規則に散る灰
+    for _ in range(200):
+        py = pile.randint(310, 510)
+        max_spread = 30 + (py - 300) * 0.58
+        px = cx + pile.uniform(-max_spread, max_spread)
+        r = pile.uniform(5, 16)
+        g = pile.randint(105, 190)
+        d.ellipse([px - r, py - r * 0.6, px + r, py + r * 0.6],
+                  fill=(g, g - 6, g - 16))
+    # 浮遊する塵 — 上方に漂う微粒子
+    for _ in range(70):
+        px = cx + pile.uniform(-100, 100)
+        py = pile.randint(250, 350)
+        r = pile.uniform(1, 4)
         g = pile.randint(150, 215)
-        d.ellipse([px, py, px + 2, py + 2], fill=(g, g - 4, g - 12))
+        d.ellipse([px - r, py - r, px + r, py + r],
+                  fill=(g, g - 4, g - 12))
+    # 内部の残り火 — 灰の中に微かに赤い粒
+    for _ in range(12):
+        px = cx + pile.uniform(-60, 60)
+        py = pile.randint(410, 480)
+        r = pile.uniform(2, 6)
+        eg = pile.randint(30, 50)
+        d.ellipse([px - r, py - r * 0.5, px + r, py + r * 0.5],
+                  fill=(ember[0] - eg, ember[1] - eg, ember[2] - eg))
 
     # ── 本文（統一テンプレートと同じフォントサイズ） ──
     wrap_draw(d, (80, 560), body, F("goth_m", 25), ash, 16, 40)
@@ -2077,9 +2086,9 @@ if __name__ == "__main__":
         1, "二経路モデル",
         "認知崩壊の機序をめぐる内部研究資料。\n共鳴と破壊――二つの経路の記録。\n――詳しく調べれば、より多くの情報が得られる気がする。",
         variant="research", header="研究資料", prefix="R").save(os.path.join(OUT, "final_front_research.png"))
-    make_shock_card(         # 衝撃証拠「灰と防護服」（一点物・暗転デザイン）
-        7, "灰と防護服",
-        "隔離区画の隅に、防護服が一着。\n中身は、指でつまめるほどの灰だけ。\n他の先遣隊員とは、少し違う気がする。",
+    make_shock_card(         # 衝撃証拠「灰の残骸」（一点物・暗転デザイン）
+        7, "灰の残骸",
+        "先遣隊の状態と近しいような灰の塊。\nしかし先遣隊と違い、人の原型すらとどめていない。\n",
     ).save(os.path.join(OUT, "final_front_ash.png"))
 
     # ── 裏／固有マス（濃紺・民俗×研究の融合） ──
