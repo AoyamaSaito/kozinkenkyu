@@ -1807,20 +1807,19 @@ def make_prologue():
 
     # プロローグ本文（左半分）
     prologue = (
-        "田舎の農村で、精神を病む者や\n"
-        "モノ言わぬ廃人が相次いだ。\n"
-        "伝承では「魂を抜かれた」と\n"
-        "語られる現象──\n"
-        "その調査の過程で、地図にない\n"
-        "地下研究施設が発見された。\n\n"
-        "先行調査に入った先遣隊は、\n"
-        "原型をなくすほど灰のように\n"
-        "崩壊した状態で見つかった。\n\n"
-        "第二次探索チーム4名が施設に\n"
-        "降りた直後、唯一の出口が閉ざされる。\n\n"
-        "崩壊の謎を追ううち、彼らは気づく──\n"
-        "この中に、人ならざる\n"
-        "「悪い何か」が紛れている。"
+        "○○県御影村──。\n\n"
+        "地元村民によって偶然発見されたのは、\n"
+        "いかなる公的記録にも存在しない\n"
+        "極秘の地下研究施設だった。\n\n"
+        "先行調査に入った先遣隊3名との通信は途絶。\n"
+        "調査本部は、正体不明の施設内で\n"
+        "起きた異常事態に対し、\n"
+        "通常の救助班では対処が困難だと\n"
+        "判断した。\n\n"
+        "この判断を受け、各分野の専門家を含む\n"
+        "第二次調査チーム4名が編成され、\n"
+        "今、当該施設への調査計画が\n"
+        "開始されようとしていた──。"
     )
     wrap_draw(d, (56, 242), prologue, F("goth_m", 26), line_col, 22, 44)
 
@@ -1830,10 +1829,10 @@ def make_prologue():
 
     # 右半分：キャスト紹介
     casts = [
-        ("大学院生",   "教授の研究室に所属する院生。\n精神的に不安定な面がある。"),
-        ("民俗学者",   "独自に農村の伝承を調査していた\n研究者。部外者。"),
-        ("調査隊員",   "先遣隊と同じ組織の正規隊員。\n通信と設備の専門家。"),
-        ("大学教授",   "認知科学の権威。自身の研究が\n施設と関連する可能性を持つ。"),
+        ("民俗学者",   "独自に農村の伝承を調査していた\n研究者。"),
+        ("調査隊員",   "先遣隊と同じ組織の正規隊員。"),
+        ("大学教授",   "認知科学を専門とする研究者。"),
+        ("大学院生",   "教授の研究室に所属する院生。"),
     ]
     cx_r = div_x + 40
     f_cast_name = F("mincho_b", 36)
@@ -1892,12 +1891,14 @@ def make_rules():
 
 
 def make_phase_bar():
-    """フェイズ進行表。1400×160横長帯。"""
-    W, H = 1400, 160
+    """フェイズ進行表。1400×200横長帯。Day区切り付き。"""
+    W, H = 1400, 200
+    DAY_H = 36
     bg = (14, 17, 26)
     line_col = (224, 228, 236)
     gold = (202, 170, 104)
     shu = (208, 86, 60)
+    day_bg = _mix(bg, gold, 0.15)
 
     img = Image.new("RGB", (W, H), bg)
     img = paper_noise(img, 2, seed=9)
@@ -1918,20 +1919,41 @@ def make_phase_bar():
     n = len(phases)
     cell_w = W // n
 
+    days = [
+        (0, 1, "到着"),
+        (1, 4, "Day 1「化け物がいた施設」"),
+        (4, 7, "Day 2「この中に化け物がいる」"),
+        (7, 10, "Day 3「どちらが悪か」"),
+    ]
+    for start, end, label in days:
+        x0 = start * cell_w
+        x1 = end * cell_w - 2
+        d.rectangle([x0, 0, x1, DAY_H - 1], fill=day_bg)
+        cx = (x0 + x1) // 2
+        f_day = F("goth_m", 16)
+        tw = d.textlength(label, font=f_day)
+        d.text((cx - tw / 2, (DAY_H - 16) // 2), label, font=f_day, fill=gold)
+        if start > 0:
+            d.line([x0, 0, x0, DAY_H - 1], fill=gold, width=1)
+
+    d.line([0, DAY_H, W, DAY_H], fill=gold, width=1)
+
+    cell_top = DAY_H
+    cell_h = H - DAY_H
     for i, (pno, pname, ptime) in enumerate(phases):
         x0 = i * cell_w
         is_fixed = i in (3, 6)
         col = shu if is_fixed else _mix(bg, line_col, 0.12)
-        d.rectangle([x0, 0, x0 + cell_w - 2, H], fill=col)
+        d.rectangle([x0, cell_top, x0 + cell_w - 2, H], fill=col)
         cx = x0 + cell_w // 2
         pno_col = (255, 240, 220) if is_fixed else gold
         name_col = (255, 255, 250) if is_fixed else line_col
-        d.text((cx - d.textlength(pno, font=F("goth_b", 36)) / 2, 8),
+        d.text((cx - d.textlength(pno, font=F("goth_b", 36)) / 2, cell_top + 8),
                pno, font=F("goth_b", 36), fill=pno_col)
-        d.text((cx - d.textlength(pname, font=F("mincho", 22)) / 2, 54),
+        d.text((cx - d.textlength(pname, font=F("mincho", 22)) / 2, cell_top + 54),
                pname, font=F("mincho", 22), fill=name_col)
         time_col = (240, 230, 220) if i in (3, 6) else _mix(bg, gold, 0.7)
-        d.text((cx - d.textlength(ptime, font=F("goth_m", 18)) / 2, 102),
+        d.text((cx - d.textlength(ptime, font=F("goth_m", 18)) / 2, cell_top + 96),
                ptime, font=F("goth_m", 18), fill=time_col)
 
     d.rectangle([0, 0, W - 1, H - 1], outline=gold, width=2)
@@ -1951,8 +1973,6 @@ def make_action_matrix():
     img = Image.new("RGB", (W, H), bg)
     img = paper_noise(img, 2, seed=5)
     d = ImageDraw.Draw(img)
-
-    d.rectangle([0, 0, W - 1, H - 1], outline=gold, width=3)
 
     title = "アクション可否表"
     f_title = F("mincho_b", 30)
@@ -1990,7 +2010,7 @@ def make_action_matrix():
     for i, (rl, row) in enumerate(zip(row_labels, matrix)):
         ry = top + hdr_h + i * cell_h
         row_bg = _mix(bg, line_col, 0.06) if i % 2 == 0 else bg
-        d.rectangle([0, ry, W - 1, ry + cell_h - 2], fill=row_bg)
+        d.rectangle([4, ry, W - 5, ry + cell_h - 2], fill=row_bg)
         rw = d.textlength(rl, font=f_row)
         d.text((lw - rw - 10, ry + (cell_h - 26) // 2), rl, font=f_row, fill=line_col)
         for j, cell in enumerate(row):
@@ -2008,6 +2028,7 @@ def make_action_matrix():
         d.line([(cx, top), (cx, top + hdr_h + len(row_labels) * cell_h)],
                fill=_mix(bg, line_col, 0.25), width=1)
 
+    d.rectangle([0, 0, W - 1, H - 1], outline=gold, width=3)
     return img
 
 
