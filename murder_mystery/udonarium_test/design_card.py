@@ -1651,9 +1651,9 @@ def make_board(zones=True):
         norm_rgba = (160, 168, 190, 50)
 
         rows_def = [
-            ("P1  初期調査",  "SECTION B-3F  ENTRANCE",      8, False, False),
-            ("P4  中期調査",  "SECTION B-4F  ISOLATION WARD", 6, True,  True),
-            ("P6  最終調査",  "SECTION B-5F  INNER SANCTUM",  2, True,  True),
+            ("P1  第1調査",   "SECTION B-3F  ENTRANCE",      8, False, False),
+            ("P4  第2調査",   "SECTION B-4F  ISOLATION WARD", 6, True,  True),
+            ("P7  最終調査",  "SECTION B-5F  INNER SANCTUM",  2, True,  True),
         ]
         row_gap = 34
         row_h = frame_pad * 2 + ch + 28

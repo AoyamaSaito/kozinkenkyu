@@ -602,7 +602,7 @@ STUDENT_UPDATE = [
      "自分以外の誰かに疑いが集まるよう立ち回れ。"),
     ("title", "スキル（変更）"),
     ("skill", ("覗き見（裏の能力）", "固有ターン限定 ／ 人を指定 ／ 固有ターン毎1回",
-               "対象が前フェーズで得た証拠品1つを秘密裏に閲覧する。")),
+               "対象が前フェーズで得た証拠カード1つを秘密裏に閲覧する。")),
 ]
 
 FOLKLORIST_INITIAL = [
@@ -679,33 +679,33 @@ if __name__ == "__main__":
 
     # ── 調査隊員 ──
     img = make_charsheet(
-        "調 査 隊 員", "御影村研究所封鎖事案 ── 第二次探索チーム", "初期配布",
+        "調 査 隊 員", "御影村研究所封鎖事案 ── 第二次調査チーム", "初期配布",
         PAL_NORMAL, INVESTIGATOR_INITIAL)
     img.save(os.path.join(OUT, "investigator_initial.png"))
     print("  investigator_initial.png")
 
     img = make_charsheet(
-        "調 査 隊 員", "御影村研究所封鎖事案 ── 第二次探索チーム", "Phase 3 更新",
+        "調 査 隊 員", "御影村研究所封鎖事案 ── 第二次調査チーム", "Phase 3 更新",
         PAL_NORMAL, INVESTIGATOR_UPDATE)
     img.save(os.path.join(OUT, "investigator_update.png"))
     print("  investigator_update.png")
 
     # ── 大学教授 ──
     img = make_charsheet(
-        "大 学 教 授", "御影村研究所封鎖事案 ── 第二次探索チーム", "初期配布",
+        "大 学 教 授", "御影村研究所封鎖事案 ── 第二次調査チーム", "初期配布",
         PAL_NORMAL, PROFESSOR_INITIAL)
     img.save(os.path.join(OUT, "professor_initial.png"))
     print("  professor_initial.png")
 
     img = make_charsheet(
-        "大 学 教 授", "御影村研究所封鎖事案 ── 第二次探索チーム", "Phase 3 更新",
+        "大 学 教 授", "御影村研究所封鎖事案 ── 第二次調査チーム", "Phase 3 更新",
         PAL_NORMAL, PROFESSOR_UPDATE)
     img.save(os.path.join(OUT, "professor_update.png"))
     print("  professor_update.png")
 
     # ── 民俗学者 ──
     img = make_charsheet(
-        "民 俗 学 者", "御影村研究所封鎖事案 ── 第二次探索チーム", "初期配布",
+        "民 俗 学 者", "御影村研究所封鎖事案 ── 第二次調査チーム", "初期配布",
         PAL_NORMAL, FOLKLORIST_INITIAL)
     img.save(os.path.join(OUT, "folklorist_initial.png"))
     print("  folklorist_initial.png")
@@ -718,7 +718,7 @@ if __name__ == "__main__":
 
     # ── 大学院生 ──
     img = make_charsheet(
-        "大 学 院 生", "御影村研究所封鎖事案 ── 第二次探索チーム", "初期配布",
+        "大 学 院 生", "御影村研究所封鎖事案 ── 第二次調査チーム", "初期配布",
         PAL_NORMAL, STUDENT_INITIAL)
     img.save(os.path.join(OUT, "student_initial.png"))
     print("  student_initial.png")
