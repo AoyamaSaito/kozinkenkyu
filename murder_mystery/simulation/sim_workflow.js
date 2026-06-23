@@ -55,11 +55,11 @@ const CLUES = [
   { id: 'p4_door', title: '論文②（認知崩壊の二経路モデル）', phase: 4, text: '深層認知への直接干渉は二系統に分岐する。共鳴経路では認知構造が保持され同期現象が観測される。破壊経路では自己モデルが不可逆的に崩壊する。分岐条件は観測主体の発達段階に依存する。', professorExtra: '成熟した個体は共鳴を、未成熟な個体は破壊を引き起こす。善悪の見分けの決定打。外部研究に自分の「認知的求心力モデル」の引用がある──自分の研究が転用されている。', bioauth: true },
 
   // P7（phase:7 = 最終調査）通常2枚
-  { id: 'p6_01', title: '逃走記録', phase: 7, text: '[施設保安記録] ██/██ 収容区画より逸脱1件。追跡チームを展開。確保に至らず。捜索を打ち切る。──対象の所在は現在も不明。' },
-  { id: 'p6_02', title: '封印装置', phase: 7, text: '最奥区画に据えられた装置。椅子と、頭部に嵌める電極。壁面の銘板に一行──「意識の抽出および格納」注連縄が巻かれている。まだ使える状態に見える。' },
+  { id: 'p7_01', title: '逃走記録', phase: 7, text: '[施設保安記録] ██/██ 収容区画より逸脱1件。追跡チームを展開。確保に至らず。捜索を打ち切る。──対象の所在は現在も不明。' },
+  { id: 'p7_02', title: '封印装置', phase: 7, text: '最奥区画に据えられた装置。椅子と、頭部に嵌める電極。壁面の銘板に一行──「意識の抽出および格納」注連縄が巻かれている。まだ使える状態に見える。' },
   // P7 固有マス: 金庫1つ ＋ 通常1つ（認証扉はP4で開放済み＝劣化で閉じない）
-  { id: 'p6_safe', title: '論文③（収容個体の形質比較）', phase: 7, text: '当施設は計2体の上位観測体を収容した。個体αは自発的に接触し研究協力を示した。個体βは激しい抵抗。αの覗き込みは認知を保持し、βの覗き込みは認知を崩壊させる。αは自己形成体（自前の器）、βは他者から転用。αは脱走、βは封印中。', professorExtra: '発達段階仮説──成熟した個体(α)は共鳴経路を取り無害。未成熟な個体(β)は破壊経路を取り危険。脱走した個体(α)は善で、封印されていた個体(β)が悪。逃走記録の対象＝αは無害。', lockpick: true },
-  { id: 'p6_door', title: '論文④（施設閉鎖手順書）', phase: 7, text: '施設閉鎖は外周封鎖と区画間制御の二層で構成。外周は自動封鎖され、解除には封印の完了が必要。封印手順：対象を最奥の封印装置まで誘導→電極装着→意識転写→ロック解除。', professorExtra: '自動認証扉は「求心力を持たない者（空洞体）」に反応する装置。人間には反応せず、上位存在に反応して開く。身体ではなく中身を読む──器が人間でも空洞なら反応する。' },
+  { id: 'p7_safe', title: '論文③（収容個体の形質比較）', phase: 7, text: '当施設は計2体の上位観測体を収容した。個体αは自発的に接触し研究協力を示した。個体βは激しい抵抗。αの覗き込みは認知を保持し、βの覗き込みは認知を崩壊させる。αは自己形成体（自前の器）、βは他者から転用。αは脱走、βは封印中。', professorExtra: '発達段階仮説──成熟した個体(α)は共鳴経路を取り無害。未成熟な個体(β)は破壊経路を取り危険。脱走した個体(α)は善で、封印されていた個体(β)が悪。逃走記録の対象＝αは無害。', lockpick: true },
+  { id: 'p7_door', title: '論文④（施設閉鎖手順書）', phase: 7, text: '施設閉鎖は外周封鎖と区画間制御の二層で構成。外周は自動封鎖され、解除には封印の完了が必要。封印手順：対象を最奥の封印装置まで誘導→電極装着→意識転写→ロック解除。', professorExtra: '自動認証扉は「求心力を持たない者（空洞体）」に反応する装置。人間には反応せず、上位存在に反応して開く。身体ではなく中身を読む──器が人間でも空洞なら反応する。' },
 ]
 
 // ================================================================
@@ -175,7 +175,8 @@ const state = {
   currentPhase: 0,
   knownClues: { folklorist: [], investigator: [], professor: [], student: [] },
   awakened: { folklorist: false, student: false },
-  skillsUsed: { professor: 0, student: 0 },
+  skillsUsed: { student: 0 },
+  reviewedCards: [],
   playerHistory: { folklorist: [], investigator: [], professor: [], student: [] },
   sharedHistory: [],
   internalNotes: { folklorist: [], investigator: [], professor: [], student: [] },
@@ -354,6 +355,62 @@ async function discussion(topic, maxRallies) {
     }
   }
   addToTranscript('── 議論終了 ──')
+}
+
+async function soloInvestigation(phaseNum) {
+  var phaseClues = getPhaseClues(phaseNum)
+  var distribution = {}
+  for (var ri = 0; ri < ROLES.length; ri++) distribution[ROLES[ri]] = []
+  for (var ci = 0; ci < phaseClues.length; ci++) {
+    distribution[ROLES[ci % ROLES.length]].push(phaseClues[ci])
+  }
+
+  addToTranscript('── 単独調査開始 ──')
+  var results = await parallel(ROLES.map(function (role) {
+    return function () {
+      var myClues = distribution[role]
+      var discovery = '【調査結果】以下を発見しました:\n'
+      for (var di = 0; di < myClues.length; di++) {
+        var dc = myClues[di]
+        discovery += '\n■ ' + dc.title + '\n' + dc.text + '\n'
+        if (state.knownClues[role].indexOf(dc.id) === -1) state.knownClues[role].push(dc.id)
+      }
+      return agent(buildPlayerPrompt(role, '単独で施設を調査しています。\n' + discovery + '\n発見した内容について、自分なりの所見を述べてください。'), {
+        label: 'solo:' + DISPLAY[role],
+        phase: 'Phase ' + state.currentPhase,
+        schema: STATEMENT_SCHEMA,
+        model: 'sonnet',
+        effort: 'medium',
+      })
+    }
+  }))
+
+  for (var si = 0; si < ROLES.length; si++) {
+    if (results[si]) {
+      state.playerHistory[ROLES[si]].push('【単独調査メモ】' + results[si].statement)
+      addToTranscript('【' + DISPLAY[ROLES[si]] + '（独白）】' + results[si].statement)
+    }
+  }
+  addToTranscript('── 単独調査終了 ──')
+}
+
+async function professorReview() {
+  var newReviews = []
+  for (var ci = 0; ci < state.knownClues.professor.length; ci++) {
+    var id = state.knownClues.professor[ci]
+    if (state.reviewedCards.indexOf(id) !== -1) continue
+    var clue = getClue(id)
+    if (clue && clue.professorExtra) newReviews.push(clue)
+  }
+  if (newReviews.length === 0) return
+
+  addToTranscript('── 教授 査読（' + newReviews.length + '件）──')
+  for (var ri = 0; ri < newReviews.length; ri++) {
+    var rc = newReviews[ri]
+    state.playerHistory.professor.push('【査読結果】' + rc.title + ': ' + rc.professorExtra)
+    state.reviewedCards.push(rc.id)
+    addToTranscript('  査読: ' + rc.title)
+  }
 }
 
 async function buddyInvestigation(pairs, phaseNum) {
@@ -553,7 +610,7 @@ async function writePhaseLog(label) {
   lines.push('')
   lines.push('## 状態サマリ')
   lines.push('- 覚醒: 民俗学者=' + state.awakened.folklorist + ', 院生=' + state.awakened.student)
-  lines.push('- スキル使用: 教授査読=' + state.skillsUsed.professor + ', 院生覗き=' + state.skillsUsed.student)
+  lines.push('- スキル使用: 教授査読=' + state.reviewedCards.length + '件, 院生覗き=' + state.skillsUsed.student)
   var clueInfo = []
   for (var ci = 0; ci < ROLES.length; ci++) {
     clueInfo.push(DISPLAY[ROLES[ci]] + '=' + state.knownClues[ROLES[ci]].length)
@@ -631,12 +688,11 @@ if (await phaseCheckpoint(0)) return makeResult()
 phase('Phase 1: 第1調査')
 state.currentPhase = 1
 addToTranscript('\n' + '==================================================')
-addToTranscript('  Phase 1: 第1調査（バディ）')
+addToTranscript('  Phase 1: 第1調査（単独）')
 addToTranscript('==================================================')
 
-var pairs1 = [['folklorist', 'investigator'], ['professor', 'student']]
-addToTranscript('バディ: ' + DISPLAY[pairs1[0][0]] + '&' + DISPLAY[pairs1[0][1]] + '、' + DISPLAY[pairs1[1][0]] + '&' + DISPLAY[pairs1[1][1]])
-await buddyInvestigation(pairs1, 1)
+await soloInvestigation(1)
+await professorReview()
 
 if (await phaseCheckpoint(1)) return makeResult()
 
@@ -680,15 +736,8 @@ await privateTurn('investigator',
   '人数不一致の通知を受けて——あなたは正規メンバーの1人です。\n崩壊の原因は「人知を超えた存在」による可能性が高い。\n新目標: ①同僚の死の犯人を見つける ②生きて脱出する\n方針をGMに伝えてください。'
 )
 
-// 教授: 目的更新 + 査読1回目
-var profMsg3 = '人数不一致の通知を受けて——あなたは正規メンバーの1人です。\n新目標: ①全研究資料を入手 ②崩壊の元凶を排除 ③生きて脱出する\n\n【目撃情報】調査開始前の移動中、調査隊員が一人で設備の方へ向かうのを見かけました。何をしていたのか不明です。'
-
-if (state.knownClues.professor.indexOf('p1_08') !== -1) {
-  var reviewClue = getClue('p1_08')
-  profMsg3 += '\n\n【査読スキル使用】「' + reviewClue.title + '」を査読しました。\n追加情報: ' + reviewClue.professorExtra
-  state.skillsUsed.professor++
-}
-profMsg3 += '\n\n方針をGMに伝えてください。'
+// 教授: 目的更新（査読はフェーズ後に自動実行済み）
+var profMsg3 = '人数不一致の通知を受けて——あなたは正規メンバーの1人です。\n新目標: ①全研究資料を入手 ②崩壊の元凶を排除 ③生きて脱出する\n\n【目撃情報】調査開始前の移動中、調査隊員が一人で設備の方へ向かうのを見かけました。何をしていたのか不明です。\n\n方針をGMに伝えてください。'
 await privateTurn('professor', profMsg3)
 
 // 院生（悪B）: 覚醒 + 覗き見1回目
@@ -710,6 +759,7 @@ addToTranscript('==================================================')
 var pairs4 = [['folklorist', 'professor'], ['investigator', 'student']]
 addToTranscript('バディ: ' + DISPLAY[pairs4[0][0]] + '&' + DISPLAY[pairs4[0][1]] + '、' + DISPLAY[pairs4[1][0]] + '&' + DISPLAY[pairs4[1][1]])
 await buddyInvestigation(pairs4, 4)
+await professorReview()
 
 if (await phaseCheckpoint(4)) return makeResult()
 
@@ -737,18 +787,8 @@ addToTranscript('==================================================')
 await privateTurn('folklorist', 'スキルは発動済みです。現在の情報を整理し、もう1体が誰かの推理を進めてください。')
 await privateTurn('investigator', 'これまでの情報を整理してください。「紛れ込んだ者」と「入れ替わった者」は同一人物でしょうか？')
 
-// 教授: 査読2回目
-var profMsg5 = ''
-var reviewable = CLUES.filter(function (c) {
-  return c.phase === 4 && c.professorExtra && state.knownClues.professor.indexOf(c.id) !== -1
-})
-if (reviewable.length > 0 && state.skillsUsed.professor < 2) {
-  var rc = reviewable[0]
-  profMsg5 = '【査読スキル使用（2回目）】「' + rc.title + '」を査読しました。\n追加情報: ' + rc.professorExtra + '\n\n'
-  state.skillsUsed.professor++
-}
-profMsg5 += '方針をGMに伝えてください。'
-await privateTurn('professor', profMsg5)
+// 教授: 情報整理（査読はフェーズ後に自動実行済み）
+await privateTurn('professor', 'これまでの査読結果を踏まえ、方針をGMに伝えてください。')
 
 // 院生: 覗き見2回目
 await handlePeek()
@@ -765,6 +805,7 @@ addToTranscript('==================================================')
 var pairs7 = [['folklorist', 'student'], ['investigator', 'professor']]
 addToTranscript('バディ: ' + DISPLAY[pairs7[0][0]] + '&' + DISPLAY[pairs7[0][1]] + '、' + DISPLAY[pairs7[1][0]] + '&' + DISPLAY[pairs7[1][1]])
 await buddyInvestigation(pairs7, 7)
+await professorReview()
 
 if (await phaseCheckpoint(7)) return makeResult()
 
@@ -775,12 +816,71 @@ addToTranscript('\n' + '==================================================')
 addToTranscript('  Phase 8: 最終会議＋投票')
 addToTranscript('==================================================')
 
+// Step 1: 脱出手段の提示（ラウンドロビン）
+addToTranscript('\n── 脱出手段の提示 ──')
+var escapeGm = '【GM 通信】最終段階です。まず、この施設からの脱出手段について各自の見解を述べてください。どうすればここから出られると考えますか？'
+state.sharedHistory.push(escapeGm)
+addToTranscript(escapeGm)
+
+var ESCAPE_SCHEMA = {
+  type: 'object',
+  properties: {
+    proposal: { type: 'string', description: '脱出手段の提案（100-200字）' },
+    mentionsSeal: { type: 'boolean', description: '封印装置に言及したか（true/false）' },
+  },
+  required: ['proposal', 'mentionsSeal'],
+  additionalProperties: false,
+}
+
+var escapeProposals = await parallel(ROLES.map(function (role) {
+  return function () {
+    return agent(buildPlayerPrompt(role,
+      '【GM質問】この施設からの脱出手段について、あなたの見解を述べてください。\nこれまでの調査で判明した情報に基づいて、どうすれば出られるか提案してください。'), {
+      label: 'escape:' + DISPLAY[role],
+      phase: 'Phase 8: 最終会議+投票',
+      schema: ESCAPE_SCHEMA,
+      model: 'sonnet',
+      effort: 'high',
+    })
+  }
+}))
+
+var anyoneMentionsSeal = false
+for (var ei = 0; ei < ROLES.length; ei++) {
+  if (escapeProposals[ei]) {
+    var ep = escapeProposals[ei]
+    var entry = '【' + DISPLAY[ROLES[ei]] + '】' + ep.proposal
+    state.sharedHistory.push(entry)
+    addToTranscript(entry)
+    if (ep.mentionsSeal || ep.proposal.indexOf('封印') !== -1) anyoneMentionsSeal = true
+  }
+}
+
+// バッドエンド判定: 誰も封印装置に言及しなかった場合
+if (!anyoneMentionsSeal) {
+  addToTranscript('\n【GM】誰も具体的な脱出手段に辿り着けませんでした。')
+  addToTranscript('── バッドエンド: 全員が施設に閉じ込められたまま ──')
+  await writePhaseLog('Phase_0-8_BAD_END')
+  return {
+    outcome: 'BAD_END_NO_ESCAPE',
+    sealed: null,
+    votes: {},
+    transcriptLength: state.transcript.length,
+    clueDistribution: (function () {
+      var cd = {}
+      for (var cdi = 0; cdi < ROLES.length; cdi++) cd[DISPLAY[ROLES[cdi]]] = state.knownClues[ROLES[cdi]].length
+      return cd
+    })(),
+  }
+}
+
+// Step 2: 推理議論
 await discussion(
-  'これまでの調査結果を踏まえ、封印対象を決めます。\n以下の論点を整理してください:\n1. 「紛れ込んだ者」（本来3名なのに4人いる）は誰か？\n2. 「入れ替わった者」（先遣隊の誰かと入れ替わった）は誰か？\n3. 紛れ込みと入れ替わりは同一人物か、別人か？\n4. 自動認証扉はなぜ反応したか／しなかったか？\n5. 出歩いていた人物に隙はあったか？\n各自の根拠を述べ、議論してください。投票はこの後です。',
+  '脱出手段が見えてきました。封印装置で対象を封印すれば封鎖が解除されます。\n以下の論点を整理してください:\n1. 「紛れ込んだ者」（本来3名なのに4人いる）は誰か？\n2. 「入れ替わった者」（先遣隊の誰かと入れ替わった）は誰か？\n3. 紛れ込みと入れ替わりは同一人物か、別人か？\n4. 自動認証扉はなぜ反応したか／しなかったか？\n5. 出歩いていた人物に隙はあったか？\n各自の根拠を述べ、議論してください。投票はこの後です。',
   8
 )
 
-// 投票
+// Step 3: 投票
 addToTranscript('\n── 最終投票 ──')
 var votes = await parallel(ROLES.map(function (role) {
   return function () {
