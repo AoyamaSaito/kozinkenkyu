@@ -1076,14 +1076,20 @@ def draw_warning_box(d, x, y, title, lines, colw, accent, ink, f_hd_key, f_bd_ke
     return y + box_h + 10
 
 
-def draw_footnotes(d, x, y, notes, W, M, sub, f_bd_key):
+def draw_footnotes(d, x, y, notes, W, M, sub, f_bd_key, highlight_indices=None, highlight_color=None):
     f_b = F(f_bd_key, 16)
-    # 区切り線
+    f_b_bold = F("mincho_b", 17)
     d.line([(M, y), (W - M, y)], fill=sub, width=1)
     y += 8
-    for note in notes:
-        d.text((M, y), note, font=f_b, fill=sub)
-        y += 22
+    for i, note in enumerate(notes):
+        if highlight_indices and i in highlight_indices and highlight_color:
+            tw = d.textlength(note, font=f_b_bold)
+            d.rectangle([(M - 2, y - 1), (M + tw + 4, y + 19)], fill=(255, 248, 240))
+            d.text((M, y), note, font=f_b_bold, fill=highlight_color)
+            d.line([(M, y + 20), (M + tw, y + 20)], fill=highlight_color, width=1)
+        else:
+            d.text((M, y), note, font=f_b, fill=sub)
+        y += 24
     return y + 6
 
 
@@ -1280,11 +1286,12 @@ def make_paper(paper_id=1, redacted=False, style="warm"):
         ])
         y_r = draw_branch_diagram(d, rx, y_r + 10, colw, ink, accent, sub)
         # 脚注
-        fn_y = H - 140
+        fn_y = max(y_r + 16, H - 140)
         draw_footnotes(d, lx, fn_y,
                        ["*1 ○○（○○大学 認知科学専攻教授）「自己モデルの統合と離散」",
                         "*2 ○○・○○「覗き込み現象の段階的記録」本紀要 Vol.7 No.3"],
-                       W, M, sub, f_bd)
+                       W, M, sub, f_bd,
+                       highlight_indices={0}, highlight_color=accent)
 
     elif paper_id == 3:
         # 左列
