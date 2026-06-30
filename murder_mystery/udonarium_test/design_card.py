@@ -53,18 +53,24 @@ def corner(d, x, y, sx, sy, color, ln=46, w=3):
     d.line([(x, y), (x, y + sy * ln)], fill=color, width=w)
 
 
-def wrap_draw(d, xy, text, fnt, fill, max_chars, line_h):
+def wrap_draw(d, xy, text, fnt, fill, max_w, line_h):
     x, y = xy
     for para in text.split("\n"):
+        if not para:
+            y += line_h
+            continue
         line = ""
         for ch in para:
-            if len(line) >= max_chars:
+            test = line + ch
+            if d.textlength(test, font=fnt) > max_w and line:
                 d.text((x, y), line, font=fnt, fill=fill)
                 y += line_h
-                line = ""
-            line += ch
-        d.text((x, y), line, font=fnt, fill=fill)
-        y += line_h
+                line = ch
+            else:
+                line = test
+        if line:
+            d.text((x, y), line, font=fnt, fill=fill)
+            y += line_h
     return y
 
 
@@ -118,7 +124,7 @@ def make_evidence_card(no, title, body, header="物的証拠", prefix="C"):
     d.polygon([(cx, yy - 9), (cx + 11, yy), (cx, yy + 9), (cx - 11, yy)], fill=accent)
 
     # 本文
-    wrap_draw(d, (56, 282), body, F("goth_m", 27), (56, 51, 46), 17, 48)
+    wrap_draw(d, (56, 282), body, F("goth_m", 27), (56, 51, 46), 488, 48)
 
     # 機密スタンプ（半透明・傾き）
     st = stamp("機密", (168, 42, 42, 150), 58)
@@ -738,7 +744,7 @@ def make_evidence_card_wa(no, title, body, variant="ofuda", header="物的証拠
                fill=_mix(p1, sumi, 0.4))
         # 本文
         wrap_draw(d, (80, 262), body, F(v["body_font"], 25),
-                  (48, 42, 38), 16, 40)
+                  (48, 42, 38), 480, 40)
         # スタンプ（右下・傾き）
         img = img.convert("RGBA")
         st = stamp(v["stamp_text"], (shu[0], shu[1], shu[2], 120), 38, angle=-8)
@@ -765,7 +771,7 @@ def make_evidence_card_wa(no, title, body, variant="ofuda", header="物的証拠
         d.text((W - 50 - d.textlength(no_s, font=fno), 66), no_s, font=fno, fill=(244, 210, 204))
         d.text((52, 162), title, font=F("mincho_b", 46), fill=sumi)
         d.line([(52, 238), (W - 52, 238)], fill=kin, width=2)
-        wrap_draw(d, (56, 286), body, F("goth_m", 27), (54, 47, 43), 16, 48)
+        wrap_draw(d, (56, 286), body, F("goth_m", 27), (54, 47, 43), 488, 48)
         _seal(d, W - 116, H - 150, 52, "封", shu, washi0)
 
     foot = "地下研究施設 ── 調査記録"
@@ -896,7 +902,7 @@ def make_shock_card(no, title, body, header="物的証拠", prefix="C"):
                   fill=(ember[0] - eg, ember[1] - eg, ember[2] - eg))
 
     # ── 本文（統一テンプレートと同じフォントサイズ） ──
-    wrap_draw(d, (80, 560), body, F("goth_m", 25), ash, 16, 40)
+    wrap_draw(d, (80, 560), body, F("goth_m", 25), ash, 480, 40)
 
     # スタンプ（右下・傾き — 統一テンプレートと同じ位置）
     st = stamp("要検証", (shu[0], shu[1], shu[2], 150), 38, angle=-8)
@@ -1035,7 +1041,7 @@ def draw_numbered_list(d, x, y, items, colw, ink, f_bd_key, lh=36,
     f_n = F(f_hd_key or f_bd_key, 22)
     f_b = F(f_bd_key, 20)
     indent = 38
-    mc = (colw - indent) // 20
+    mc = colw - indent
     num_col = accent or ink
     for i, item in enumerate(items, 1):
         y0 = y
@@ -1063,7 +1069,7 @@ def draw_warning_box(d, x, y, title, lines, colw, accent, ink, f_hd_key, f_bd_ke
     d.text((x + pad, y + pad), title, font=f_h, fill=accent)
     # 本文
     ty = y + pad + 36
-    mc = (colw - pad * 2) // 20
+    mc = colw - pad * 2
     for line in lines:
         wrap_draw(d, (x + pad, ty), line, f_b, ink, mc, lh)
         ty += lh
@@ -1114,7 +1120,7 @@ def make_paper(paper_id=1, redacted=False, style="warm"):
     lx, rx = M, M + colw + 44
     redactions = []
     f_h, f_b = F(f_hd, 25), F(f_bd, 22)
-    mc, lh = colw // 22, 36
+    mc, lh = colw, 36
 
     # ── ヘッダ ──
     d.text((M, 34), "CLASSIFIED ── 内部資料 / 持出厳禁", font=F(f_bd, 20), fill=accent)
@@ -1183,7 +1189,7 @@ def make_paper(paper_id=1, redacted=False, style="warm"):
     d.rectangle([M, ay, W - M, ay + abh], outline=sub, width=1)
     d.text((M + 18, ay + 14), "Abstract", font=F(f_hd, 22), fill=ink)
     wrap_draw(d, (M + 18, ay + 50), abstracts[paper_id], F(f_bd, 20), ink,
-              (W - 2 * M - 36) // 20, 30)
+              W - 2 * M - 36, 30)
 
     body_top = ay + abh + 34
 
@@ -1830,7 +1836,7 @@ def make_prologue():
         "今、当該施設への調査計画が\n"
         "開始されようとしていた──。"
     )
-    wrap_draw(d, (56, 242), prologue, F("goth_m", 26), line_col, 22, 44)
+    wrap_draw(d, (56, 242), prologue, F("goth_m", 26), line_col, 572, 44)
 
     # 縦区切り線
     div_x = W // 2 + 20
@@ -1852,7 +1858,7 @@ def make_prologue():
     for name, desc in casts:
         d.text((cx_r, cy), name, font=f_cast_name, fill=line_col)
         cy += 48
-        wrap_draw(d, (cx_r + 12, cy), desc, f_cast_body, _mix((8, 10, 18), line_col, 0.7), 28, 36)
+        wrap_draw(d, (cx_r + 12, cy), desc, f_cast_body, _mix((8, 10, 18), line_col, 0.7), 616, 36)
         cy += 36 * (desc.count("\n") + 1) + 20
         d.line([(cx_r, cy), (W - 56, cy)], fill=_mix((8, 10, 18), gold, 0.3), width=1)
         cy += 20
@@ -1893,7 +1899,7 @@ def make_rules():
     for rule in rules:
         check_col = _mix((8, 10, 18), (100, 220, 140), 0.85)
         d.text((68, ry), "✓", font=f_rule, fill=check_col)
-        wrap_draw(d, (120, ry), rule, f_rule, line_col, 36, 48)
+        wrap_draw(d, (120, ry), rule, f_rule, line_col, 1080, 48)
         ry += 100
 
     return img.convert("RGB")
@@ -2080,7 +2086,7 @@ if __name__ == "__main__":
         variant="ofuda", header="物的証拠").save(os.path.join(OUT, "final_front_evidence.png"))
     make_evidence_card_wa(   # 書類・ログ系（施設記録＝罫線紙＋等幅＋綴じ穴）
         5, "先遣隊 活動記録",
-        "[██年5月12日]\n第3日。B区画の調査を継続。\n設備の劣化が激しいが\n通行に支障なし。\n明日は奥の区画に入る予定。\n\n──以降の記録はない。",
+        "[20██年5月12日]\n第3日。B区画の調査を継続。\n設備の劣化が激しいが\n通行に支障なし。\n明日は奥の区画に入る予定。\n\n──以降の記録はない。",
         variant="log", header="記録", prefix="L").save(os.path.join(OUT, "final_front_log.png"))
     make_evidence_card_wa(   # 研究資料（固有デザイン＝藍枠の綴じ文書）＋末尾に「より詳しく…」の含み
         1, "二経路モデル",

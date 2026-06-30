@@ -26,12 +26,12 @@ PAL_NORMAL = dict(
     border=(26, 39, 68),
 )
 PAL_EVIL_ALPHA = dict(
-    bg=(18, 6, 6), header_bg=(60, 8, 8), header_fg=(240, 80, 60),
-    text=(210, 185, 170), accent=(240, 70, 50), section=(200, 60, 50),
-    mbox_bg=(40, 14, 14), mbox_border=(180, 40, 30),
-    skill_bg=(35, 12, 12), skill_border=(140, 30, 25),
-    hint_bg=(30, 12, 12), hint_border=(140, 30, 25),
-    tag_bg=(140, 20, 15), tag_fg=(255, 210, 200),
+    bg=(18, 6, 6), header_bg=(60, 8, 8), header_fg=(255, 200, 180),
+    text=(240, 230, 220), accent=(255, 160, 140), section=(255, 200, 180),
+    mbox_bg=(40, 14, 14), mbox_border=(200, 60, 50),
+    skill_bg=(35, 12, 12), skill_border=(160, 40, 35),
+    hint_bg=(30, 12, 12), hint_border=(160, 40, 35),
+    tag_bg=(140, 20, 15), tag_fg=(255, 230, 220),
     border=(120, 25, 20),
     blood_line=(200, 50, 40),
 )
@@ -183,26 +183,35 @@ def draw_skill_box(d, y, name, cond, desc, pal):
     font_name = F("mincho_b", 24)
     font_cond = F("goth_m", 16)
     font_desc = F("mincho", 18)
+    max_w = BODY_W - 50
     desc_lines = []
-    line = ""
-    for ch in desc:
-        test = line + ch
-        bbox = d.textbbox((0, 0), test, font=font_desc)
-        if bbox[2] - bbox[0] > BODY_W - 50:
+    line_colors = []
+    for para in desc.split("\n"):
+        is_note = para.lstrip().startswith("※")
+        if not para:
+            desc_lines.append("")
+            line_colors.append(pal["text"])
+            continue
+        line = ""
+        for ch in para:
+            test = line + ch
+            if d.textlength(test, font=font_desc) > max_w and line:
+                desc_lines.append(line)
+                line_colors.append(pal["accent"] if is_note else pal["text"])
+                line = ch
+            else:
+                line = test
+        if line:
             desc_lines.append(line)
-            line = ch
-        else:
-            line = test
-    if line:
-        desc_lines.append(line)
+            line_colors.append(pal["accent"] if is_note else pal["text"])
     box_h = 40 + 22 + len(desc_lines)*26 + 16
     d.rounded_rectangle([(MARGIN, y), (W-MARGIN, y+box_h)], radius=6, fill=pal["skill_bg"],
                         outline=pal["skill_border"], width=1)
     d.text((MARGIN+14, y+10), name, font=font_name, fill=pal["section"])
     d.text((MARGIN+14, y+42), cond, font=font_cond, fill=pal.get("skill_cond", (120,120,120)))
     ty = y + 68
-    for ln in desc_lines:
-        d.text((MARGIN+14, ty), ln, font=font_desc, fill=pal["text"])
+    for ln, color in zip(desc_lines, line_colors):
+        d.text((MARGIN+14, ty), ln, font=font_desc, fill=color)
         ty += 26
     return y + box_h + 8
 
@@ -409,13 +418,15 @@ INVESTIGATOR_INITIAL = [
     ("mission", [
         "施設を調査し、ここで何が起きたのかを突き止める",
         "同僚に何が起きたのか、その真相を知る",
+        "この施設の関係者がメンバー内にいるなら、特定し確保する",
         "この施設から脱出する手段を見つける",
     ]),
     ("title", "プレイングのポイント"),
     ("hint",
      "あなたは正規の調査メンバーだ。実務的で冷静な態度を取りつつ、同僚への思いが時折にじむ。"
      "全員の中で最も「調査のプロ」であり、発見した証拠の整理・分析は得意分野。"
-     "金庫の開錠は誰と一緒の時に使うかが駆け引きになる。"),
+     "金庫の開錠は誰と一緒の時に使うかが駆け引きになる。\n"
+     "自己紹介の際、「施設関係者の特定・確保」の任務を全員に公表してよい。"),
     ("title", "スキル"),
     ("skill", ("開　錠", "探索フェーズ中 ／ 金庫マスで使用 ／ 2回",
                "鍵付きの金庫を開けることができる。バディ調査中に使用した場合、ペア相手にも中身が見える。")),
@@ -442,8 +453,8 @@ INVESTIGATOR_UPDATE = [
     ]),
     ("title", "目標（更新）"),
     ("mission", [
-        "この研究所で何が行われていたのか、真相を突き止める",
-        "同僚の死の原因──「犯人」を特定する",
+        "同僚の死の犯人を特定する",
+        "施設関係者を見つけ出し確保する",
         "生きてこの研究所から出る",
     ]),
     ("title", "プレイングのポイント"),
@@ -481,13 +492,12 @@ PROFESSOR_INITIAL = [
     ("title", "プレイングのポイント"),
     ("hint",
      "あなたは学者だ。冷静な分析と知識の深さで場をリードできる。"
-     "研究資料の収集と査読が最大の武器。"
-     "ただし、資料にあなたの名前があることを他のメンバーに見せるかどうかは慎重に判断せよ。"
-     "「施設の関係者では？」と疑われるリスクがある。"),
+     "研究資料の収集と査読が最大の武器。査読結果をどこまで共有するかが駆け引きになる。"
+     "ただし、あまり情報を出し過ぎると「施設関係者なのでは？」と疑われてしまうかもしれない。"),
     ("title", "スキル"),
     ("skill", ("査　読", "研究資料カード入手後 ／ 回数無制限",
-               "研究資料カードの隠された情報を読み解き、追加情報を獲得する。"
-               "査読結果は自分だけが受け取る。共有するかどうかはあなた次第。\n"
+               "研究資料カードの隠された情報を読み解き、追加情報を獲得する。\n"
+               "※査読結果は口頭でのみ共有可能。元のカードや原本は他PLに見せられません。\n"
                "※各フェーズ終了時にGMから査読結果が配布されます。")),
 ]
 
@@ -513,16 +523,17 @@ PROFESSOR_UPDATE = [
     ("mission", [
         "全ての研究資料を入手、または閲覧する",
         "崩壊の元凶を突き止め、排除する",
+        "4人目の正体を特定する",
         "生きてこの研究所から出る",
     ]),
     ("title", "プレイングのポイント"),
     ("hint",
-     "査読を続けるほど真相に近づくが、あなたの名前が資料に出てくる以上、"
-     "知識を披露するほど「なぜそこまで知っている？」と疑われる可能性がある。"),
+     "査読を続けるほど真相に近づくが、知識を披露するほど"
+     "「なぜそこまで知っている？」と疑われる可能性がある。"),
     ("title", "スキル（変更なし）"),
     ("skill", ("査　読", "研究資料カード入手後 ／ 回数無制限",
-               "研究資料カードの隠された情報を読み解き、追加情報を獲得する。"
-               "査読結果は自分だけが受け取る。共有するかどうかはあなた次第。\n"
+               "研究資料カードの隠された情報を読み解き、追加情報を獲得する。\n"
+               "※査読結果は口頭でのみ共有可能。元のカードや原本は他PLに見せられません。\n"
                "※各フェーズ終了時にGMから査読結果が配布されます。")),
 ]
 
@@ -554,11 +565,12 @@ STUDENT_INITIAL = [
      "自分の視点で観察し、自分なりの解釈を持て。"
      "教授への信頼と、独立した判断のバランスが問われる。"),
     ("title", "スキル"),
-    ("skill", ("情 報 確 認", "固有ターン限定 ／ 1回",
-               "フィールド上のまだ誰も確認していない公開カードを1枚閲覧できる。")),
+    ("skill", ("査　読", "固有ターン限定 ／ 最大2回",
+               "研究資料カードから追加情報を読み解く。GMから口頭で査読結果を受け取る。\n"
+               "※査読結果は口頭でのみ共有可能。元のカードや原本は他PLに見せられません。")),
 ]
 
-STUDENT_UPDATE = [
+STUDENT_UPDATE_1 = [
     ("title", "あなたに起きたこと"),
     ("body", (
         "頭の中で何かが弾けた。\n\n"
@@ -581,19 +593,28 @@ STUDENT_UPDATE = [
         "封鎖中に施設内をくまなく探索した。"
         "施設の構造と物品の配置はある程度把握している。\n\n"
         "施設の最奥に封印装置がある。"
-        "誰かをそこで封印すれば、封鎖は解除される。",
+        "誰かをそこで封印すれば、封鎖は解除される。\n\n"
+        "施設の区画間には自動認証扉がある。"
+        "この扉は空洞検知──求心力を持たない存在を検知する機構で動作する。\n\n"
+        "過去にもう1体、この施設から脱走した記録がある。"
+        "4人目は、おそらくその個体だろう。",
         ["院生の残骸", "灰の塊", "自分の存在の証拠になる",
-         "封印装置", "誰かをそこで封印すれば、封鎖は解除される"])),
+         "封印装置", "誰かをそこで封印すれば、封鎖は解除される",
+         "自動認証扉", "空洞検知", "もう1体、この施設から脱走した"])),
     ("title", "あなたの行動についての報告"),
     ("body", (
         "昨夜、この器の持ち主は一人で施設内を歩き回っていた。"
         "だからこそ疑われずに体を奪うことが出来たわけだが、"
         "出歩くところを誰かに見られていた可能性がある。",
         ["一人で施設内を歩き回っていた"])),
+]
+
+STUDENT_UPDATE_2 = [
     ("title", "目標（全面変更）"),
     ("mission", [
         "正体を秘匿する",
         "自分以外の誰かを封印させ、施設から脱出する",
+        "4人目の正体──おそらくもう一人の同種──を見極める",
     ]),
     ("title", "プレイングのポイント"),
     ("hint",
@@ -601,8 +622,9 @@ STUDENT_UPDATE = [
      "脱出には誰かを封印装置に送り込む必要がある──"
      "自分以外の誰かに疑いが集まるよう立ち回れ。"),
     ("title", "スキル（変更）"),
-    ("skill", ("覗き見（裏の能力）", "固有ターン限定 ／ 人を指定 ／ 固有ターン毎1回",
-               "対象が前フェーズで得た証拠カード1つを秘密裏に閲覧する。")),
+    ("skill", ("査　読", "固有ターン限定 ／ 最大2回",
+               "研究資料カードから追加情報を読み解く。GMから口頭で査読結果を受け取る。\n"
+               "※査読結果は口頭でのみ共有可能。元のカードや原本は他PLに見せられません。")),
 ]
 
 FOLKLORIST_INITIAL = [
@@ -635,6 +657,10 @@ FOLKLORIST_INITIAL = [
      "あなたは伝承の研究者として参加している。"
      "施設への既知感やデータ改ざんの事実を悟られないよう振る舞え。"
      "なぜ自分がここに来なければならなかったのか──その答えが、この施設のどこかにある。"),
+    ("title", "スキル"),
+    ("skill", ("気配感知", "自動発動 ／ GM通知",
+               "あなたはときおり、説明のつかない直感に襲われる。\n"
+               "特定のタイミングでGMから情報を受け取る。")),
 ]
 
 FOLKLORIST_UPDATE = [
@@ -666,11 +692,104 @@ FOLKLORIST_UPDATE = [
     ("title", "プレイングのポイント"),
     ("hint",
      "人数不一致の「犯人」はあなた自身だ。だが名乗れば正体に直結する。"
+     "調査隊員は「施設関係者の確保」を任務に掲げている──正体を明かせば確保対象になりかねない。"
      "この施設にいる壊す者の存在を、あなただけが明確に認知している。"),
     ("title", "想起（自動発火済み）"),
     ("skill", ("想　起", "Phase 3 自動発火 ／ 追加使用なし",
                "封印装置が最奥区画にあることを思い出した。この情報をどう使うかはあなた次第。")),
 ]
+
+
+# ── 気配感知カード（民俗学者専用・横長スリップ） ──
+
+PAL_KEHAI = dict(
+    bg=(12, 18, 38), frame=(60, 80, 130),
+    title=(180, 200, 240), subtitle=(120, 140, 180),
+    text=(235, 230, 220), accent=(160, 190, 255),
+    line=(50, 65, 110),
+)
+
+KEHAI_CARDS = [
+    {
+        "tag": "固有ターン1",
+        "title": "気配感知",
+        "body": "──この施設のどこかに、何かが隠れている。\n\n"
+                "理由は分からない。だが確信がある。\n"
+                "人ではない何かの気配を、あなたは感じ取っている。",
+    },
+    {
+        "tag": "固有ターン2",
+        "title": "気配感知",
+        "body": "──調査隊の誰かが、入れ替わっている。\n\n"
+                "一夜目だ。あの夜を境に、気配が変わった。\n"
+                "人だったものが、人ではなくなっている。\n"
+                "あなたにはそれが分かる。",
+    },
+]
+
+
+def make_kehai_card(data):
+    KW, KH = 840, 360
+    M = 40
+    img = Image.new("RGB", (KW, KH), PAL_KEHAI["bg"])
+    d = ImageDraw.Draw(img)
+
+    d.rectangle([(0, 0), (KW-1, KH-1)], outline=PAL_KEHAI["frame"], width=2)
+    d.rectangle([(6, 6), (KW-7, KH-7)], outline=PAL_KEHAI["line"], width=1)
+
+    for i in range(3):
+        cx = KW // 2
+        ry = 30 + i * 8
+        rx = 320 - i * 40
+        for angle in range(0, 360, 2):
+            rad = math.radians(angle)
+            x = cx + int(rx * math.cos(rad))
+            y = 20 + int(ry * 0.3 * math.sin(rad))
+            alpha = max(0, 30 - i * 10)
+            if 0 <= x < KW and 0 <= y < KH:
+                r, g, b = img.getpixel((x, y))
+                img.putpixel((x, y), (min(255, r+alpha), min(255, g+alpha+5), min(255, b+alpha+15)))
+
+    tag_font = F("goth_m", 14)
+    tag_text = data["tag"]
+    tbbox = d.textbbox((0, 0), tag_text, font=tag_font)
+    tw = tbbox[2] - tbbox[0]
+    tx = KW - M - tw - 8
+    d.rounded_rectangle([(tx-6, 16), (tx+tw+6, 38)], radius=3,
+                        fill=PAL_KEHAI["frame"], outline=PAL_KEHAI["accent"], width=1)
+    d.text((tx, 17), tag_text, font=tag_font, fill=PAL_KEHAI["accent"])
+
+    d.text((M, 16), "── 民俗学者専用 ──", font=F("goth_m", 13), fill=PAL_KEHAI["subtitle"])
+
+    title_font = F("mincho_b", 32)
+    d.text((M, 50), data["title"], font=title_font, fill=PAL_KEHAI["title"])
+
+    d.line([(M, 92), (KW-M, 92)], fill=PAL_KEHAI["line"], width=1)
+
+    body_font = F("mincho", 20)
+    max_w = KW - M * 2
+    y = 106
+    for para in data["body"].split("\n"):
+        if not para:
+            y += 14
+            continue
+        is_em = para.startswith("──")
+        color = PAL_KEHAI["accent"] if is_em else PAL_KEHAI["text"]
+        line = ""
+        for ch in para:
+            test = line + ch
+            if d.textlength(test, font=body_font) > max_w and line:
+                d.text((M, y), line, font=body_font, fill=color)
+                y += 30
+                line = ch
+            else:
+                line = test
+        if line:
+            d.text((M, y), line, font=body_font, fill=color)
+            y += 30
+
+    paper_noise(img, amount=2, seed=99)
+    return img
 
 
 if __name__ == "__main__":
@@ -724,9 +843,22 @@ if __name__ == "__main__":
     print("  student_initial.png")
 
     img = make_charsheet(
-        "大 学 院 生", "── あなたは、人間ではなかった ──", "Phase 3 覚醒",
-        PAL_EVIL_ALPHA, STUDENT_UPDATE, extra_decor=decor_evil_alpha)
-    img.save(os.path.join(OUT, "student_update.png"))
-    print("  student_update.png")
+        "大 学 院 生", "── あなたは、人間ではなかった ──", "Phase 3 覚醒 ①",
+        PAL_EVIL_ALPHA, STUDENT_UPDATE_1, extra_decor=decor_evil_alpha)
+    img.save(os.path.join(OUT, "student_update_1.png"))
+    print("  student_update_1.png")
+
+    img = make_charsheet(
+        "大 学 院 生", "── あなたは、人間ではなかった ──", "Phase 3 覚醒 ②",
+        PAL_EVIL_ALPHA, STUDENT_UPDATE_2, extra_decor=decor_evil_alpha)
+    img.save(os.path.join(OUT, "student_update_2.png"))
+    print("  student_update_2.png")
+
+    # ── 気配感知カード ──
+    for i, data in enumerate(KEHAI_CARDS, 1):
+        img = make_kehai_card(data)
+        path = os.path.join(OUT, f"kehai_{i}.png")
+        img.save(path)
+        print(f"  kehai_{i}.png ({img.size[0]}x{img.size[1]})")
 
     print("\n完了")
