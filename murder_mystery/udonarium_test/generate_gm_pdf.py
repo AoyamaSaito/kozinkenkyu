@@ -192,19 +192,26 @@ def render_blockquote(pdf: GmPdf, lines: list):
     bq_x = 20 + indent       # 28mm
     border_x = bq_x - 5      # left border position
     bq_width = effective_width(pdf) - indent
+    pad = 3
 
-    # Estimate height
-    char_per_line = max(1, int(bq_width / 2.5))
-    est_lines = sum(max(1, len(ln) // char_per_line + 1) for ln in lines)
-    est_h = est_lines * line_h + 6
+    # Measure actual height via dry_run (fpdf2 >= 2.7.5)
+    pdf.set_font(pdf._body_font, size=9.5)
+    rendered = pdf.multi_cell(bq_width, line_h, text, align="L",
+                              markdown=True, wrapmode=WrapMode.CHAR,
+                              dry_run=True, output="LINES")
+    actual_h = len(rendered) * line_h + 6
 
     y0 = pdf.get_y()
 
-    # Draw background
+    # If block won't fit on current page, start a new one
+    if y0 + actual_h > pdf.h - pdf.b_margin:
+        pdf.add_page()
+        y0 = pdf.get_y()
+
+    # Draw background with measured height
     pdf.set_fill_color(*C_BQ_BG)
     pdf.set_draw_color(*C_BQ_BG)
-    pad = 3
-    pdf.rect(bq_x - pad, y0, bq_width + pad * 2, est_h, style="F")
+    pdf.rect(bq_x - pad, y0, bq_width + pad * 2, actual_h, style="F")
     pdf.set_draw_color(0, 0, 0)
 
     # Render text
@@ -212,7 +219,6 @@ def render_blockquote(pdf: GmPdf, lines: list):
         pdf.set_left_margin(bq_x)
         pdf.set_y(y0 + 2)
         pdf.set_x(bq_x)
-        pdf.set_font(pdf._body_font, size=9.5)
         pdf.set_text_color(*C_BQ_TEXT)
         pdf.multi_cell(bq_width, line_h, text, align="L",
                        markdown=True, wrapmode=WrapMode.CHAR)
@@ -221,10 +227,10 @@ def render_blockquote(pdf: GmPdf, lines: list):
         pdf.set_left_margin(20)
         pdf.set_right_margin(20)
 
-    # Left border
+    # Left border spans actual rendered area
     pdf.set_draw_color(*C_BQ_BORDER)
     pdf.set_line_width(3)
-    pdf.line(border_x, y0, border_x, max(y1, y0 + est_h))
+    pdf.line(border_x, y0, border_x, max(y1, y0 + actual_h))
     pdf.set_line_width(0.2)
     pdf.set_draw_color(0, 0, 0)
     pdf.set_text_color(*C_TEXT)
