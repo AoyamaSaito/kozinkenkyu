@@ -979,16 +979,18 @@ def draw_table(d, x, y, headers, rows, colw, ink, accent, sub, f_hd_key, f_bd_ke
 
 
 def draw_branch_diagram(d, x, y, colw, ink, accent, sub):
-    f_b = F("mincho", 18)
+    # コンパクト版（高さ約112px）。脚注に被らないよう縦間隔を詰めてある。
+    f_b = F("mincho", 17)
+    f_s = F("mincho", 15)
     cx = x + colw // 2
-    top_y = y + 10
+    top_y = y
     # 「覗き込み」ラベル
     label = "覗き込み"
     lw = int(d.textlength(label, font=f_b))
     d.text((cx - lw // 2, top_y), label, font=f_b, fill=ink)
     # 垂直線
-    stem_y1 = top_y + 24
-    stem_y2 = stem_y1 + 20
+    stem_y1 = top_y + 22
+    stem_y2 = stem_y1 + 12
     d.line([(cx, stem_y1), (cx, stem_y2)], fill=sub, width=2)
     # 水平分岐線
     lbx = x + colw // 4
@@ -996,7 +998,7 @@ def draw_branch_diagram(d, x, y, colw, ink, accent, sub):
     branch_y = stem_y2
     d.line([(lbx, branch_y), (rbx, branch_y)], fill=sub, width=2)
     # 左右の垂直線
-    box_top = branch_y + 18
+    box_top = branch_y + 13
     d.line([(lbx, branch_y), (lbx, box_top)], fill=sub, width=2)
     d.line([(rbx, branch_y), (rbx, box_top)], fill=sub, width=2)
     # 矢印（▼）
@@ -1005,35 +1007,35 @@ def draw_branch_diagram(d, x, y, colw, ink, accent, sub):
     # 左ボックス（共鳴経路）
     green_muted = (80, 110, 80)
     bw = colw // 2 - 14
-    bh = 32
+    bh = 27
     lbx0 = lbx - bw // 2
     d.rounded_rectangle([lbx0, box_top, lbx0 + bw, box_top + bh], radius=6, outline=green_muted, width=2)
     lbl_l = "【共鳴経路】"
     lw2 = int(d.textlength(lbl_l, font=f_b))
-    d.text((lbx - lw2 // 2, box_top + 8), lbl_l, font=f_b, fill=green_muted)
+    d.text((lbx - lw2 // 2, box_top + 5), lbl_l, font=f_b, fill=green_muted)
     # 右ボックス（破壊経路）
     rbx0 = rbx - bw // 2
     d.rounded_rectangle([rbx0, box_top, rbx0 + bw, box_top + bh], radius=6, outline=accent, width=2)
     lbl_r = "【破壊経路】"
     rw2 = int(d.textlength(lbl_r, font=f_b))
-    d.text((rbx - rw2 // 2, box_top + 8), lbl_r, font=f_b, fill=accent)
+    d.text((rbx - rw2 // 2, box_top + 5), lbl_r, font=f_b, fill=accent)
     # サブラベル行1
-    sub_y1 = box_top + bh + 8
+    sub_y1 = box_top + bh + 5
     sub_l1 = "器を保つ(同期)"
     sub_r1 = "器を壊す(崩壊)"
-    sw = int(d.textlength(sub_l1, font=f_b))
-    d.text((lbx - sw // 2, sub_y1), sub_l1, font=f_b, fill=green_muted)
-    sw2 = int(d.textlength(sub_r1, font=f_b))
-    d.text((rbx - sw2 // 2, sub_y1), sub_r1, font=f_b, fill=accent)
+    sw = int(d.textlength(sub_l1, font=f_s))
+    d.text((lbx - sw // 2, sub_y1), sub_l1, font=f_s, fill=green_muted)
+    sw2 = int(d.textlength(sub_r1, font=f_s))
+    d.text((rbx - sw2 // 2, sub_y1), sub_r1, font=f_s, fill=accent)
     # 末端ラベル
-    sub_y2 = sub_y1 + 24
+    sub_y2 = sub_y1 + 20
     sub_l2 = "〈成熟した個体〉"
     sub_r2 = "〈未成熟な個体〉"
-    sw3 = int(d.textlength(sub_l2, font=f_b))
-    d.text((lbx - sw3 // 2, sub_y2), sub_l2, font=f_b, fill=green_muted)
-    sw4 = int(d.textlength(sub_r2, font=f_b))
-    d.text((rbx - sw4 // 2, sub_y2), sub_r2, font=f_b, fill=accent)
-    return sub_y2 + 24
+    sw3 = int(d.textlength(sub_l2, font=f_s))
+    d.text((lbx - sw3 // 2, sub_y2), sub_l2, font=f_s, fill=green_muted)
+    sw4 = int(d.textlength(sub_r2, font=f_s))
+    d.text((rbx - sw4 // 2, sub_y2), sub_r2, font=f_s, fill=accent)
+    return sub_y2 + 20
 
 
 def draw_numbered_list(d, x, y, items, colw, ink, f_bd_key, lh=36,
@@ -1284,9 +1286,12 @@ def make_paper(paper_id=1, redacted=False, style="warm"):
             "破壊型のみが封じ込め対象となる。この区別を欠けば無害な個体への過誤が生じうる。"
             "今後は分岐条件の定量化と個体差の解明が求められる。",
         ])
-        y_r = draw_branch_diagram(d, rx, y_r + 10, colw, ink, accent, sub)
+        # 脚注の上端に被らないようアンカー配置（高さ約112px・下端の余白16px確保）
+        fn_y = H - 140
+        diag_h = 112
+        diag_y = min(y_r + 8, fn_y - 16 - diag_h)
+        draw_branch_diagram(d, rx, diag_y, colw, ink, accent, sub)
         # 脚注
-        fn_y = max(y_r + 16, H - 140)
         draw_footnotes(d, lx, fn_y,
                        ["*1 ○○（○○大学 認知科学専攻教授）「自己モデルの統合と離散」",
                         "*2 ○○・○○「覗き込み現象の段階的記録」本紀要 Vol.7 No.3"],
@@ -1452,14 +1457,14 @@ def make_board(zones=True):
     pipe_dk = _mix(bg0, steel, 0.20)
     rivet = _mix(bg0, steel, 0.45)
 
-    # 主グリッド（床タイル）
-    for x in range(0, W, 64):
+    # 主グリッド（床タイル）── Udonarium gridSize=40 と一致させる
+    for x in range(0, W, 40):
         d.line([(x, 0), (x, H)], fill=dim, width=1)
-    for y in range(0, H, 48):
+    for y in range(0, H, 40):
         d.line([(0, y), (W, y)], fill=dim, width=1)
-    # タイル目地の交差点にアンカーボルト
-    for x in range(0, W, 256):
-        for y in range(0, H, 192):
+    # タイル目地の交差点にアンカーボルト（5セルごと）
+    for x in range(0, W, 200):
+        for y in range(0, H, 200):
             d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=rivet)
 
     # 天井配管ラック（上部 3本束）
@@ -1655,23 +1660,35 @@ def make_board(zones=True):
     d.text((cx - sw / 2, title_y + 78), sub_text, font=f_sub, fill=gold)
 
     # ── カード配置ゾーン（下=入口→上=最奥） ──
+    # 【重要】Udonarium のグリッドに完全整列させる。
+    #   ボード 1920×1200 を gridSize=40 の 48×30 セルとして 1:1 表示する前提。
+    #   → 1セル = GRID(=40)px。カードは size=4（=160px幅, アスペクト5:7で224px高）。
+    #   スロットの左上は必ず GRID の倍数に乗せ、幅=cw・高=ch をカード実表示寸と一致させる。
+    #   これによりカードがスロットへピタリと吸着する。
     if zones:
-        cw, ch = 164, 230
-        gap = 10
-        frame_pad = 14
+        GRID = 40                      # = Udonarium gridSize
+        CARD_CELLS = 4                 # = card size（XMLの<size>）
+        cw = CARD_CELLS * GRID         # 160 … カード表示幅
+        ch = int(cw * 7 / 5)           # 224 … カード表示高（600:840=5:7）
+        gap = GRID                     # 40  … スロット間（1セル）
+        pitch = cw + gap               # 200 … スロット間隔（=5セル）
+        frame_pad = 12
         safe_rgba = (202, 170, 104, 70)
         door_rgba = (100, 200, 210, 70)
         norm_rgba = (160, 168, 190, 50)
 
+        def _snap(v):                  # GRID の倍数へ切り下げ
+            return (int(v) // GRID) * GRID
+
+        # (ラベル, 区画コード, 通常数, 金庫, 認証扉, スロット上端y[GRID倍数])
         rows_def = [
-            ("P1  第1調査",   "SECTION B-3F  ENTRANCE",      8, False, False),
-            ("P4  第2調査",   "SECTION B-4F  ISOLATION WARD", 6, True,  True),
-            ("P7  最終調査",  "SECTION B-5F  INNER SANCTUM",  2, True,  True),
+            ("P7  最終調査",  "SECTION B-5F  INNER SANCTUM",  2, True,  True,  200),
+            ("P4  第2調査",   "SECTION B-4F  ISOLATION WARD", 6, True,  True,  560),
+            ("P1  第1調査",   "SECTION B-3F  ENTRANCE",       8, False, False, 920),
         ]
-        row_gap = 34
-        row_h = frame_pad * 2 + ch + 28
-        total_h = len(rows_def) * row_h + (len(rows_def) - 1) * row_gap
-        zy_base = H - total_h - 16
+        header_h = 36                  # スロット上のラベル帯
+        label_h = 26                   # スロット下の名称
+        zy_base = rows_def[0][5] - header_h   # 最奥フレーム上端（鳥居の基準）
 
         img = img.convert("RGBA")
         ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -1680,16 +1697,18 @@ def make_board(zones=True):
         f_sec2 = F("ms_goth", 14)
         f_slot = F("goth_m", 18)
 
-        for ri_raw, (row_label, sec_code, n_norm, has_safe, has_door) in enumerate(rows_def):
-            ri = len(rows_def) - 1 - ri_raw
-            zy = zy_base + ri * (row_h + row_gap)
+        prev_frame = None              # 下の行フレーム（接続パイプ用）
 
+        for row_idx, (row_label, sec_code, n_norm, has_safe, has_door, slot_y) in enumerate(rows_def):
             n_total = n_norm + (1 if has_safe else 0) + (1 if has_door else 0)
-            inner_w = n_total * cw + (n_total - 1) * gap
-            frame_w = inner_w + frame_pad * 2
-            frame_x = (W - frame_w) // 2
-            frame_y = zy
-            frame_h = row_h
+            row_w = (n_total - 1) * pitch + cw
+            # スロット左端を GRID 倍数へ（中央寄せ後にスナップ）
+            slot_x0 = _snap((W - row_w) / 2)
+
+            frame_x = slot_x0 - frame_pad
+            frame_y = slot_y - header_h
+            frame_w = row_w + frame_pad * 2
+            frame_h = header_h + ch + label_h + frame_pad
 
             # フレーム外枠（二重線）
             od.rectangle([frame_x, frame_y, frame_x + frame_w, frame_y + frame_h],
@@ -1735,19 +1754,16 @@ def make_board(zones=True):
             scw = od.textlength(sec_code, font=f_sec2)
             od.text((frame_x + frame_w - scw - 14, frame_y + stripe_h + 10),
                     sec_code, font=f_sec2, fill=(steel[0], steel[1], steel[2], 160))
-            # フレーム間の接続パイプ（上の行への導管表現）
-            if ri > 0:
+            # フレーム間の接続パイプ（下の行＝直前に描いた行へ）
+            if prev_frame is not None:
+                pfx, pfy, pfw = prev_frame
                 pipe_cx = frame_x + frame_w // 2
-                od.line([(pipe_cx - 20, frame_y + frame_h),
-                         (pipe_cx - 20, frame_y + frame_h + row_gap)],
+                gap_top = frame_y + frame_h
+                od.line([(pipe_cx - 20, gap_top), (pipe_cx - 20, pfy)],
                         fill=(steel[0], steel[1], steel[2], 80), width=3)
-                od.line([(pipe_cx + 20, frame_y + frame_h),
-                         (pipe_cx + 20, frame_y + frame_h + row_gap)],
+                od.line([(pipe_cx + 20, gap_top), (pipe_cx + 20, pfy)],
                         fill=(steel[0], steel[1], steel[2], 80), width=3)
-
-            # カードスロット配置（金庫=最左、通常カード、認証扉=最右）
-            slot_y = frame_y + stripe_h + 30
-            slot_x0 = frame_x + frame_pad
+            prev_frame = (frame_x, frame_y, frame_w)
 
             def _draw_slot(sx, sy, rgba, label=None):
                 od.rectangle([sx, sy, sx + cw, sy + ch],
@@ -1764,11 +1780,11 @@ def make_board(zones=True):
                 idx = 1
 
             for ci in range(n_norm):
-                sx = slot_x0 + (idx + ci) * (cw + gap)
+                sx = slot_x0 + (idx + ci) * pitch
                 _draw_slot(sx, slot_y, norm_rgba)
 
             if has_door:
-                sx = slot_x0 + (idx + n_norm) * (cw + gap)
+                sx = slot_x0 + (idx + n_norm) * pitch
                 _draw_slot(sx, slot_y, door_rgba, "認証扉")
 
         img.alpha_composite(ov)
@@ -1798,6 +1814,212 @@ def make_board(zones=True):
     gd2.line([(cx, tcy + 24), (cx, tcy + 90)], fill=(200, 220, 255, 18), width=8)
     gd2.line([(cx, tcy + 24), (cx, tcy + 90)], fill=(240, 248, 255, 30), width=2)
     img.alpha_composite(glow2)
+
+    return img.convert("RGB")
+
+
+def make_backdrop():
+    """全体背景。1920×1200。Udonarium の game-table 背景（マップの外周を埋める下地）用。
+    施設テクスチャは周縁に展開し、中央はヴィネットで沈ませてマップが映えるようにする。
+    タイトル・鳥居・中央グロー・ゾーン枠・中央誘導矢印は持たない（=マップと二重写りしない）。"""
+    W, H = 1920, 1200
+    bg0, bg1 = (15, 18, 28), (4, 6, 12)
+    shu = (208, 86, 60)
+    gold = (202, 170, 104)
+    line = (190, 196, 210)
+    steel = (80, 88, 106)
+    dim = _mix(bg0, line, 0.07)
+
+    img = vgrad((W, H), bg0, bg1)
+    img = paper_noise(img, 3, seed=91)
+    d = ImageDraw.Draw(img)
+    cx = W // 2
+
+    rnd = random.Random(77)
+    pipe_col = _mix(bg0, steel, 0.35)
+    pipe_hi = _mix(bg0, steel, 0.55)
+    pipe_dk = _mix(bg0, steel, 0.20)
+    rivet = _mix(bg0, steel, 0.45)
+
+    # 主グリッド（床タイル）＋ アンカーボルト
+    for x in range(0, W, 64):
+        d.line([(x, 0), (x, H)], fill=dim, width=1)
+    for y in range(0, H, 48):
+        d.line([(0, y), (W, y)], fill=dim, width=1)
+    for x in range(0, W, 256):
+        for y in range(0, H, 192):
+            d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=rivet)
+
+    # 天井配管ラック（上部 3本束）＋ ブラケット
+    for py in (76, 90, 104):
+        d.line([(0, py), (W, py)], fill=pipe_col, width=5)
+        d.line([(0, py - 2), (W, py - 2)], fill=pipe_hi, width=1)
+        d.line([(0, py + 2), (W, py + 2)], fill=pipe_dk, width=1)
+    for bx in range(120, W, 240):
+        d.rectangle([bx - 3, 70, bx + 3, 110], fill=pipe_col, outline=pipe_hi, width=1)
+        d.ellipse([bx - 4, 68, bx + 4, 74], fill=rivet)
+    # ダクト（天井帯）
+    d.rectangle([0, 112, W, 124], fill=_mix(bg0, steel, 0.16))
+    for x in range(0, W, 24):
+        d.rectangle([x, 113, x + 12, 123], fill=_mix(bg0, steel, 0.26))
+    # ケーブルトレイ（天井下）
+    ct_y = 128
+    d.line([(0, ct_y), (W, ct_y)], fill=pipe_dk, width=2)
+    d.line([(0, ct_y + 6), (W, ct_y + 6)], fill=pipe_dk, width=2)
+    for x in range(0, W, 40):
+        d.line([(x, ct_y), (x, ct_y + 6)], fill=pipe_dk, width=1)
+    # 底部にも対称の配管帯（下辺を締める）
+    for py in (H - 104, H - 90, H - 76):
+        d.line([(0, py), (W, py)], fill=pipe_col, width=4)
+        d.line([(0, py - 2), (W, py - 2)], fill=pipe_dk, width=1)
+    for bx in range(120, W, 240):
+        d.rectangle([bx - 3, H - 110, bx + 3, H - 70], fill=pipe_col, outline=pipe_hi, width=1)
+
+    # 縦配管（左右壁面 各3本）＋ ジョイント ＋ バルブ
+    for px in (22, 38, 54, W - 22, W - 38, W - 54):
+        d.line([(px, 0), (px, H)], fill=pipe_col, width=4)
+        d.line([(px - 2, 0), (px - 2, H)], fill=pipe_hi, width=1)
+        d.line([(px + 2, 0), (px + 2, H)], fill=pipe_dk, width=1)
+    for px in (22, 38, 54, W - 22, W - 38, W - 54):
+        for py in (76, 90, 104, H - 104, H - 90, H - 76):
+            d.ellipse([px - 7, py - 7, px + 7, py + 7], fill=pipe_col, outline=pipe_hi, width=1)
+    for px in (38, W - 38):
+        for vy in range(200, H - 60, 280):
+            vy2 = vy + rnd.randint(-30, 30)
+            d.rectangle([px - 10, vy2, px + 10, vy2 + 16], fill=pipe_col, outline=pipe_hi, width=1)
+            d.line([(px - 14, vy2 + 8), (px - 10, vy2 + 8)], fill=shu, width=2)
+
+    # 壁面計器パネル（左右、ゲージ/バー）
+    gauge_bg = _mix(bg0, steel, 0.12)
+    gauge_line = _mix(bg0, steel, 0.40)
+    gauge_fill = _mix(bg0, (60, 180, 120), 0.25)
+    gauge_warn = _mix(bg0, shu, 0.30)
+    for side_x in (72, W - 72):
+        for py in range(160, H - 60, 130):
+            pw, ph = 34, 60
+            px0 = side_x - pw // 2
+            d.rectangle([px0, py, px0 + pw, py + ph], fill=gauge_bg, outline=gauge_line, width=1)
+            gtype = rnd.choice(["arc", "bar", "bar"])
+            if gtype == "arc":
+                gcx, gcy = px0 + pw // 2, py + 28
+                gr = 12
+                d.arc([gcx - gr, gcy - gr, gcx + gr, gcy + gr], 200, 340, fill=gauge_line, width=1)
+                angle = rnd.randint(210, 330)
+                nx = gcx + int(gr * 0.8 * math.cos(math.radians(angle)))
+                ny = gcy + int(gr * 0.8 * math.sin(math.radians(angle)))
+                d.line([(gcx, gcy), (nx, ny)], fill=gauge_warn if angle > 300 else gauge_fill, width=1)
+                d.ellipse([gcx - 2, gcy - 2, gcx + 2, gcy + 2], fill=gauge_line)
+            else:
+                bx = px0 + 6
+                bh_max = ph - 16
+                bar_fill_h = rnd.randint(int(bh_max * 0.2), bh_max)
+                bc = gauge_warn if bar_fill_h > bh_max * 0.8 else gauge_fill
+                d.rectangle([bx, py + 8, bx + 8, py + 8 + bh_max], outline=gauge_line, width=1)
+                d.rectangle([bx + 1, py + 8 + bh_max - bar_fill_h, bx + 7, py + 8 + bh_max - 1], fill=bc)
+                for ti in range(0, bh_max, bh_max // 4 or 1):
+                    d.line([(bx + 9, py + 8 + ti), (bx + 12, py + 8 + ti)], fill=gauge_line, width=1)
+                bx2 = px0 + 18
+                bar2_h = rnd.randint(int(bh_max * 0.1), int(bh_max * 0.7))
+                d.rectangle([bx2, py + 8, bx2 + 8, py + 8 + bh_max], outline=gauge_line, width=1)
+                d.rectangle([bx2 + 1, py + 8 + bh_max - bar2_h, bx2 + 7, py + 8 + bh_max - 1], fill=gauge_fill)
+            f_pid = F("ms_goth", 8)
+            pid = f"{chr(65 + rnd.randint(0, 5))}-{rnd.randint(1,9)}"
+            d.text((px0 + 2, py + ph - 10), pid, font=f_pid, fill=gauge_line)
+
+    # 左右壁面ハザードストライプ（上部）＋ 換気グリル ＋ 計測目盛り
+    hz_y = 136
+    for hx in list(range(0, 68, 8)) + list(range(W - 68, W, 8)):
+        d.polygon([(hx, hz_y), (hx + 4, hz_y), (hx + 8, hz_y + 12), (hx + 4, hz_y + 12)],
+                  fill=_mix(bg0, gold, 0.16))
+    for side_x in (70, W - 70):
+        for gy in range(180, H - 80, 200):
+            gx0 = side_x - 16
+            d.rectangle([gx0, gy, gx0 + 32, gy + 20], outline=_mix(bg0, steel, 0.3), width=1)
+            for gs in range(gx0 + 2, gx0 + 30, 4):
+                d.line([(gs, gy + 2), (gs, gy + 18)], fill=_mix(bg0, steel, 0.2), width=1)
+    for ty in range(140, H, 40):
+        tw = 6 if ty % 200 == 0 else 3
+        d.line([(10, ty), (10 + tw, ty)], fill=_mix(bg0, steel, 0.3), width=1)
+        d.line([(W - 10, ty), (W - 10 - tw, ty)], fill=_mix(bg0, steel, 0.3), width=1)
+
+    # 底辺の排水溝グレーチング
+    for gx in range(0, W, 16):
+        d.rectangle([gx, H - 12, gx + 8, H], fill=_mix(bg0, steel, 0.15))
+        d.rectangle([gx + 8, H - 12, gx + 16, H], fill=_mix(bg0, (0, 0, 0), 0.6))
+
+    # ── ひび割れテクスチャ（周縁中心に配置・中央は控えめ） ──
+    crack_col1 = _mix(bg0, line, 0.13)
+    crack_col2 = _mix(bg0, line, 0.08)
+    crack_shadow = _mix(bg0, (0, 0, 0), 0.7)
+    crack_rnd = random.Random(515)
+    crack_seeds = [
+        (70, 170, 1.4, 1.0, 360), (190, 110, 0.6, 1.2, 300),
+        (W - 90, 200, -1.3, 1.0, 420), (W - 240, 130, -0.8, 0.9, 320),
+        (120, 560, 1.1, 0.8, 280), (W - 170, 540, -1.0, 1.0, 320),
+        (260, 920, 0.9, 0.6, 240), (W - 320, 880, -0.6, 0.8, 240),
+        (90, 1010, 1.2, 0.4, 220), (W - 110, 990, -0.9, 0.5, 200),
+        (60, 760, 1.3, 0.7, 260), (W - 70, 720, -1.2, 0.8, 260),
+    ]
+    for sx, sy, bx_bias, by_bias, length in crack_seeds:
+        x, y = float(sx), float(sy)
+        main_w = 2 if length > 300 else 1
+        for step in range(length):
+            fade = 1.0 - step / length * 0.4
+            dx = crack_rnd.gauss(bx_bias, 1.4)
+            dy = crack_rnd.gauss(by_bias, 1.1)
+            nx, ny = x + dx, y + dy
+            d.line([(int(x), int(y) + 1), (int(nx), int(ny) + 1)], fill=crack_shadow, width=main_w)
+            col = crack_col1 if fade > 0.7 else crack_col2
+            d.line([(int(x), int(y)), (int(nx), int(ny))], fill=col, width=main_w)
+            x, y = nx, ny
+            if crack_rnd.random() < 0.12:
+                bx2, by2 = x, y
+                for _ in range(crack_rnd.randint(20, 80)):
+                    bnx = bx2 + crack_rnd.gauss(-bx_bias * 0.6, 1.6)
+                    bny = by2 + crack_rnd.gauss(by_bias * 0.5, 1.2)
+                    d.line([(int(bx2), int(by2)), (int(bnx), int(bny))], fill=crack_col2, width=1)
+                    bx2, by2 = bnx, bny
+                    if crack_rnd.random() < 0.06:
+                        break
+
+    # ── 区画ステンシル（上下端のみ・タイトル無し） ──
+    f_sec = F("ms_goth", 16)
+    f_warn = F("ms_goth", 13)
+    sec_col = _mix(bg0, line, 0.16)
+    d.text((100, 140), "SECTION B-1F  SUBSURFACE RESEARCH WING", font=f_sec, fill=sec_col)
+    d.text((W - 280, 140), "RESTRICTED AREA", font=f_sec, fill=_mix(bg0, shu, 0.32))
+    d.text((100, 158), "AUTHORIZED PERSONNEL ONLY", font=f_warn, fill=_mix(bg0, shu, 0.20))
+    d.text((W - 280, 158), "BIOSAFETY LEVEL 4", font=f_warn, fill=_mix(bg0, shu, 0.20))
+    d.text((100, H - 28), "EXIT →  ELEVATOR SHAFT  B-1F", font=f_warn, fill=_mix(bg0, line, 0.11))
+    d.text((W - 320, H - 28), "EMERGENCY PROTOCOL: SEAL ALL SECTIONS",
+           font=f_warn, fill=_mix(bg0, shu, 0.14))
+
+    # ── 中央ヴィネット（マップが座る領域を沈ませる） ──
+    img = img.convert("RGBA")
+    mask = Image.new("L", (W, H), 0)
+    md = ImageDraw.Draw(mask)
+    max_a = 165          # 中央の最大暗度
+    rx_max, ry_max = int(W * 0.74), int(H * 0.80)
+    steps = 90
+    for k in range(steps):
+        t = k / (steps - 1)          # 0(外)→1(中心)
+        rx = int(rx_max * (1.0 - t))
+        ry = int(ry_max * (1.0 - t))
+        val = int(max_a * t)
+        md.ellipse([cx - rx, H // 2 - ry, cx + rx, H // 2 + ry], fill=val)
+    mask = mask.filter(ImageFilter.GaussianBlur(60))
+    shade = Image.new("RGBA", (W, H), (3, 5, 11, 0))
+    shade.putalpha(mask)
+    img.alpha_composite(shade)
+
+    # ヴィネット縁に薄い冷光のにじみ（マップの輪郭を仄かに浮かせる）
+    edge = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ed = ImageDraw.Draw(edge)
+    ed.ellipse([cx - int(W * 0.42), H // 2 - int(H * 0.40),
+                cx + int(W * 0.42), H // 2 + int(H * 0.40)],
+               outline=(150, 180, 215, 22), width=3)
+    edge = edge.filter(ImageFilter.GaussianBlur(8))
+    img.alpha_composite(edge)
 
     return img.convert("RGB")
 
@@ -1943,9 +2165,9 @@ def make_phase_bar():
 
     days = [
         (0, 1, "到着"),
-        (1, 4, "Day 1「化け物がいた施設」"),
-        (4, 7, "Day 2「この中に化け物がいる」"),
-        (7, 10, "Day 3「どちらが悪か」"),
+        (1, 4, "Day 1"),
+        (4, 7, "Day 2"),
+        (7, 10, "Day 3"),
     ]
     for start, end, label in days:
         x0 = start * cell_w
@@ -2117,6 +2339,7 @@ if __name__ == "__main__":
     # ── ボード・UI素材 ──
     make_board(zones=False).save(os.path.join(OUT, "final_board.png"))
     make_board(zones=True).save(os.path.join(OUT, "final_board_zones.png"))
+    make_backdrop().save(os.path.join(OUT, "final_backdrop.png"))
     make_prologue().save(os.path.join(OUT, "final_prologue.png"))
     make_rules().save(os.path.join(OUT, "final_rules.png"))
     make_phase_bar().save(os.path.join(OUT, "final_phase_bar.png"))

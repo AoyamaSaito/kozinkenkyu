@@ -160,13 +160,15 @@ def make_character_image(pc_no, role, kind, color):
 
 
 # ---------------- XML 組み立て ----------------
-def xml_game_table(name, img_hash):
+def xml_game_table(name, img_hash, bg_hash=""):
+    # ボード 1920×1200 を 1:1 表示するため width=48 height=30 gridSize=40。
+    # → 1セル=40px。カード size=4（160×224px）がゾーン枠へピタリ吸着する。
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<game-table name=%s width="20" height="20" gridSize="50" '
-        'imageIdentifier=%s backgroundImageIdentifier="" backgroundFilterType="" '
+        '<game-table name=%s width="48" height="30" gridSize="40" '
+        'imageIdentifier=%s backgroundImageIdentifier=%s backgroundFilterType="" '
         'selected="true" gridType="0" gridColor="#000000e6"></game-table>'
-        % (quoteattr(name), quoteattr(img_hash))
+        % (quoteattr(name), quoteattr(img_hash), quoteattr(bg_hash))
     )
 
 
@@ -199,7 +201,7 @@ def xml_card(name, front_file, back_file):
         '</node>'
         '<node name="common">'
         '<node name="name">%s</node>'
-        '<node name="size">2</node>'
+        '<node name="size">4</node>'
         '</node>'
         '<node name="detail"></node>'
         '</card>'
@@ -246,12 +248,18 @@ def verify_zip(path):
 
 def main():
     # ---- フィールド ----
-    mb = make_map_image()
+    # テーブル画像＝実物のゾーン付きボード、背景＝全体背景（ヴィネット）を採用。
+    # いずれも 1920×1200。game-table の 48×30 / gridSize=40 で 1:1 表示される。
+    import design_card as DC
+    mb = png_bytes(DC.make_board(zones=True))
+    bgb = png_bytes(DC.make_backdrop())
     mh = sha256_hex(mb)
+    bgh = sha256_hex(bgb)
     OUT = os.path.join(HERE, "outputs", "udonarium")
     os.makedirs(OUT, exist_ok=True)
     map_zip = os.path.join(OUT, "map_table.zip")
-    write_zip(map_zip, xml_game_table("地下研究施設", mh), {mh + ".png": mb})
+    write_zip(map_zip, xml_game_table("地下研究施設", mh, bgh),
+              {mh + ".png": mb, bgh + ".png": bgb})
 
     # ---- 裏表カード ----
     fb = make_card_front(
