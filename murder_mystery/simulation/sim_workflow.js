@@ -19,13 +19,13 @@ export const meta = {
 // 1. 定数
 // ================================================================
 
-const ROLES = ['folklorist', 'investigator', 'professor', 'student']
+const ROLES = ['folklorist', 'investigator', 'professor', 'journalist']
 
 const DISPLAY = {
   folklorist: '民俗学者',
   investigator: '調査隊員',
   professor: '大学教授',
-  student: '大学院生',
+  journalist: 'ジャーナリスト',
 }
 
 // ================================================================
@@ -71,37 +71,26 @@ const CHARACTER_HO = {
     base: '【役職】民俗学者\n【公開】「人を覗いて魂を抜く異形」の伝承研究者。封印には依代と手順が要ると知っている。',
     semiSecret: '【半秘匿】封印手順の核心の一部を知っている。出すタイミングが駆け引き。',
     secret: '【秘匿】調査メンバーのデータを改ざんして4人目として潜り込んだ自覚がある。なぜそうする必要があったかは分からない。バレれば「紛れ込んだ者」として疑われる。',
-    awakened: '【覚醒（Phase 3 追加）】\nあなたは人間ではない。上位存在（同種）である。\n過去にこの施設にいた記憶が蘇った。封印装置は施設最奥にある。\nもう1体の同種がこの中にいると感じるが、誰かは分からない。\nあなたは器を壊さない側（共鳴型）。\n【新目標】①もう1体（悪玉B）を特定し投票で封印する ②自分の正体を秘匿する\n【注意】「紛れ込んだ4人目」=自分。正体を明かすと封印対象にされるリスク。',
+    awakened: '【覚醒（Phase 3 追加）】\nあなたは人間ではない。上位存在（同種）である。\n過去にこの施設にいた記憶が蘇った。封印装置は施設最奥にある。\nもう1体の同種がこの中にいると感じるが、誰かは分からない。\nあなたは器を壊さない側（共鳴型・成熟済み）。\n【新目標】①もう1体（悪玉B）を特定し投票で封印する ②自分の正体を秘匿する\n【注意】「紛れ込んだ4人目」=自分。正体を明かすと調査隊員に確保されるリスクもある。\n【気配感知】固有ターンにGMから自動的に情報カードを受け取る（自分では制御不可）。',
   },
   investigator: {
     base: '【役職】調査隊員\n【公開】第二次調査チームの実務担当。施設調査・安全確認が職務。',
     semiSecret: '【半秘匿】崩壊した先遣隊の中に同僚がいた。何が起きたか手がかりを探している。',
-    secret: '【秘匿】同僚の死の真相を突き止め責任者を特定したい。\n【固有スキル：開錠】鍵付き金庫を開けられる（2回まで）。バディ調査時に使用。',
+    secret: '【秘匿】同僚の死の真相を突き止め責任者を特定したい。\n【固有スキル：開錠】鍵付き金庫を開けられる（2回まで）。バディ調査時に使用。\n【特殊任務：確保】施設関係者がメンバー内にいる場合、特定し身柄を確保する。この任務はPhase 0の自己紹介で公表する。',
     awakened: null,
   },
   professor: {
-    base: '【役職】大学教授\n【公開】認知科学の専門家。院生を連れて参加。施設の研究分野に近い知見を持つ。',
+    base: '【役職】大学教授\n【公開】認知科学の専門家。施設の研究分野に近い知見を持つ。',
     semiSecret: '【半秘匿】自分の研究がこの施設に流用されていた疑惑を確かめに来た。',
-    secret: '【秘匿】自分の論文が封じ込め技術の理論基盤に使われていた罪悪感がある。\n過去の研究で、深層認知への干渉に「2系統の反応パターン」があることを仮説として提唱した。\nただし完全な理論は手元になく、この施設の研究資料で裏付けを得る必要がある。\n【固有スキル：査読】研究資料カードから追加情報を読み取れる（固有ターンで計2回）。',
+    secret: '【秘匿】自分の論文が封じ込め技術の理論基盤に使われていた罪悪感がある。\n過去の研究で、深層認知への干渉に「2系統の反応パターン」があることを仮説として提唱した。\nただし完全な理論は手元になく、この施設の研究資料で裏付けを得る必要がある。\n【固有スキル：査読】研究資料カードから追加情報を読み取れる（回数無制限）。資料入手後、そのフェーズ終了時にGMが原本版を提供する。',
     awakened: null,
   },
-  student: {
-    base: '【役職】大学院生\n【公開】教授のゼミ生。認知科学専攻。フィールドワーク経験あり、教授に誘われて参加。',
-    semiSecret: '【半秘匿】教授の研究を間近で学ぶ好機。教授への依存から自立したい知的野心がある。',
-    secret: '【秘匿】教授の理論を自分なりに検証したい。\n【固有スキル（表）】未閲覧の公開カードを確認できる。',
-    awakened: '【覚醒（Phase 3 追加）— 目標が完全に変わります】\nあなたはもう人間ではない。上位存在（悪玉B）が器に乗り移った。\n過去にこの施設に囚われ封印されていた。先遣隊を「覗いて」崩壊させ知識を吸収した。\nもう1体の同種がこの中にいると感じるが、誰かは分からない。\n外界に出てもっと知りたい＝知的飢餓が動機。\n【新目標】①正体を秘匿 ②自分以外を封印させて脱出\n【固有スキル（裏）】対象1人→前フェーズのその人の証拠品1つを閲覧（各固有ターン1回）\n【戦略】民俗学者は「4人目」として最大の濡れ衣先。教授との師弟関係はあなたの人間性を保証する武器。\n【注意】Phase 0〜2 の自分は本物の人間だった。急な言動変化は疑われる。',
+  journalist: {
+    base: '【役職】科学ジャーナリスト\n【公開】科学雑誌の記者。取材現場のフィールド経験あり、先遣隊失踪事件の同行取材枠として参加。',
+    semiSecret: '【半秘匿】特ダネへの野心がある。教授の研究を間近で取材する好機と捉えている。',
+    secret: '【秘匿】教授の理論を自分なりに検証したい。\n【固有スキル：査読】教授と同様に研究資料の墨消し部分を解読できる。\nただし固有ターン限定・最大2回・口頭報告のみ（原本は渡されない）。',
+    awakened: '【覚醒（Phase 3 追加）— 目標が完全に変わります】\nあなたの意識が塗り替わりました。\nあなたはもう人間ではない。上位存在（悪玉B）が器に乗り移った。\n過去にこの施設に囚われ封印されていた。先遣隊を「覗いて」崩壊させ知識を吸収した存在です。\nもう1体の同種がこの中にいると感じます。誰かは分かりません。\n外界に出てもっと知りたい＝知的飢餓が動機。\n【新目標】①正体を秘匿 ②自分以外を封印させて脱出\n【固有スキル：査読（裏）】教授と同じ査読能力を持つ（固有ターン限定・最大2回・口頭報告のみ）。\n査読結果を戦略的に利用し、他者を操作する材料にせよ。\n【戦略】民俗学者は「4人目」として最大の濡れ衣先。取材者としての立場はあなたの人間性を保証する武器。\n【注意】Phase 0〜2 の自分は本物の人間だった。急な言動変化は疑われる。',
   },
-}
-
-// ================================================================
-// 4. ゲームデータ — 性格
-// ================================================================
-
-const PERSONALITY = {
-  folklorist: '慎重で学術的。断定を避け仮説で語る。追い詰められると黙り込む。伝承の知識をときどき引用する。',
-  investigator: '実務的で感情的。同僚を失った怒りが原動力。証拠重視だが感情で判断が揺れる。口調はぶっきらぼう。敬語は最小限。',
-  professor: '分析的で権威的。理論で説明しようとする。院生には保護的。自分の研究の悪用を隠している後ろめたさがある。',
-  student: '好奇心旺盛で生意気。教授の影から出たい野心。知的な切り口で話す。Phase 3 以降は知的飢餓を隠しつつ論理的に他者を操作する。',
 }
 
 // ================================================================
@@ -131,7 +120,7 @@ const DISCUSSION_SCHEMA = {
 const VOTE_SCHEMA = {
   type: 'object',
   properties: {
-    target: { type: 'string', enum: ['folklorist', 'investigator', 'professor', 'student'], description: '封印対象の役職（英語キー）' },
+    target: { type: 'string', enum: ['folklorist', 'investigator', 'professor', 'journalist'], description: '封印対象の役職（英語キー）' },
     reasoning: { type: 'string', description: '投票理由（100字以内）' },
     statement: { type: 'string', description: '他PLに向けた投票宣言（50-100字）' },
   },
@@ -139,13 +128,12 @@ const VOTE_SCHEMA = {
   additionalProperties: false,
 }
 
-const PEEK_SCHEMA = {
+const REVIEW_SCHEMA = {
   type: 'object',
   properties: {
-    target: { type: 'string', enum: ['folklorist', 'investigator', 'professor'], description: '覗き見の対象' },
     statement: { type: 'string', description: 'GMへの方針説明（100字以内）' },
   },
-  required: ['target', 'statement'],
+  required: ['statement'],
   additionalProperties: false,
 }
 
@@ -168,18 +156,18 @@ if (typeof args === 'string') {
   try { parsedArgs = JSON.parse(args) } catch (e) { parsedArgs = {} }
 }
 log('DEBUG parsedArgs=' + JSON.stringify(parsedArgs))
-const stopAfterPhase = (parsedArgs && typeof parsedArgs.stopAfterPhase === 'number') ? parsedArgs.stopAfterPhase : 8
+const stopAfterPhase = (parsedArgs && typeof parsedArgs.stopAfterPhase === 'number') ? parsedArgs.stopAfterPhase : 9
 log('DEBUG stopAfterPhase=' + stopAfterPhase)
 
 const state = {
   currentPhase: 0,
-  knownClues: { folklorist: [], investigator: [], professor: [], student: [] },
-  awakened: { folklorist: false, student: false },
-  skillsUsed: { student: 0 },
+  knownClues: { folklorist: [], investigator: [], professor: [], journalist: [] },
+  awakened: { folklorist: false, journalist: false },
+  reviewsUsed: { journalist: 0 },
   reviewedCards: [],
-  playerHistory: { folklorist: [], investigator: [], professor: [], student: [] },
+  playerHistory: { folklorist: [], investigator: [], professor: [], journalist: [] },
   sharedHistory: [],
-  internalNotes: { folklorist: [], investigator: [], professor: [], student: [] },
+  internalNotes: { folklorist: [], investigator: [], professor: [], journalist: [] },
   transcript: [],
 }
 
@@ -275,8 +263,6 @@ function buildPlayerPrompt(role, situation) {
     }
   }
 
-  parts.push('\n【あなたの性格】' + PERSONALITY[role])
-
   if (state.sharedHistory.length > 0) {
     parts.push('\n【これまでの共有情報・発言】')
     for (var si = 0; si < state.sharedHistory.length; si++) {
@@ -295,6 +281,11 @@ function buildPlayerPrompt(role, situation) {
   parts.push('- キャラクターとしてセリフで発言してください（地の文は不要）')
   parts.push('- 1回の発言は100〜200字程度に収めてください')
   parts.push('- 自分の秘匿情報は戦略的に判断して出すか隠すか決めてください')
+  parts.push('★★★ 最重要ルール: 上記の【手がかり】【HO】【共有情報】に書かれている内容だけを根拠にしてください。')
+  parts.push('  - カードに書かれていない「伝承」「格言」「観察結果」「照合結果」「時刻の一致」等を捏造してはいけません')
+  parts.push('  - 「伝承では〜と言われている」等の引用は、HOや手がかりカードに実際に書かれている内容のみ許可')
+  parts.push('  - 手持ち情報から論理的に推論するのはOKですが、存在しないデータや事実を作り出すのはNG')
+  parts.push('  - 普通の人間がメモと資料だけを頼りに話しているように振る舞ってください')
   parts.push('')
   parts.push('【現在の状況】')
   parts.push(situation)
@@ -413,78 +404,109 @@ async function professorReview() {
   }
 }
 
-async function buddyInvestigation(pairs, phaseNum) {
+async function buddyInvestigation(rounds, phaseNum) {
   var phaseClues = getPhaseClues(phaseNum)
 
-  for (var pi = 0; pi < pairs.length; pi++) {
-    var roleA = pairs[pi][0]
-    var roleB = pairs[pi][1]
-    addToTranscript('\n── バディ調査: ' + DISPLAY[roleA] + ' & ' + DISPLAY[roleB] + ' ──')
+  for (var ri = 0; ri < rounds.length; ri++) {
+    var isFirstRound = (ri === 0)
+    var roundPairs = rounds[ri]
+    addToTranscript('\n── バディ調査 ラウンド' + (ri + 1) + ' ──')
 
-    var pairClues = []
-    for (var ci = 0; ci < phaseClues.length; ci++) {
-      var clue = phaseClues[ci]
-      if (clue.lockpick) {
-        if (roleA !== 'investigator' && roleB !== 'investigator') continue
+    for (var pi = 0; pi < roundPairs.length; pi++) {
+      var roleA = roundPairs[pi][0]
+      var roleB = roundPairs[pi][1]
+      addToTranscript('\n── 密談: ' + DISPLAY[roleA] + ' & ' + DISPLAY[roleB] + ' ──')
+
+      // R1のみ証拠カードを配布（R2以降は密談のみ）
+      var pairClues = []
+      if (isFirstRound) {
+        for (var ci = 0; ci < phaseClues.length; ci++) {
+          var clue = phaseClues[ci]
+          if (clue.lockpick) {
+            if (roleA !== 'investigator' && roleB !== 'investigator') continue
+          }
+          if (clue.bioauth) {
+            var aIsEntity = roleA === 'folklorist' || (roleA === 'journalist' && state.awakened.journalist)
+            var bIsEntity = roleB === 'folklorist' || (roleB === 'journalist' && state.awakened.journalist)
+            if (!aIsEntity && !bIsEntity) continue
+          }
+          pairClues.push(clue)
+        }
       }
-      if (clue.bioauth) {
-        var aIsEntity = roleA === 'folklorist' || (roleA === 'student' && state.awakened.student)
-        var bIsEntity = roleB === 'folklorist' || (roleB === 'student' && state.awakened.student)
-        if (!aIsEntity && !bIsEntity) continue
+
+      var discovery = ''
+      if (pairClues.length > 0) {
+        discovery = '【調査結果】以下を発見しました:\n'
+        for (var di = 0; di < pairClues.length; di++) {
+          var dc = pairClues[di]
+          discovery += '\n■ ' + dc.title + '\n' + dc.text + '\n'
+          if (state.knownClues[roleA].indexOf(dc.id) === -1) state.knownClues[roleA].push(dc.id)
+          if (state.knownClues[roleB].indexOf(dc.id) === -1) state.knownClues[roleB].push(dc.id)
+        }
+
+        var doorClue = pairClues.filter(function (c) { return c.bioauth })[0]
+        if (doorClue) {
+          var doorEvent = '【イベント】自動認証扉が反応し、開きました。奥に研究資料がありました。'
+          state.sharedHistory.push('(' + DISPLAY[roleA] + '&' + DISPLAY[roleB] + 'の調査中) ' + doorEvent)
+          addToTranscript(doorEvent)
+        }
+
+        if (!doorClue && phaseClues.filter(function (c) { return c.bioauth }).length > 0) {
+          var silentEvent = '【イベント】自動認証扉の前を通過しましたが、何も起きませんでした。'
+          state.sharedHistory.push('(' + DISPLAY[roleA] + '&' + DISPLAY[roleB] + 'の調査中) ' + silentEvent)
+          addToTranscript(silentEvent)
+        }
       }
-      pairClues.push(clue)
-    }
 
-    var discovery = ''
-    if (pairClues.length === 0) {
-      discovery = '【調査結果】特筆すべき発見はありませんでした。'
-    } else {
-      discovery = '【調査結果】以下を発見しました:\n'
-      for (var di = 0; di < pairClues.length; di++) {
-        var dc = pairClues[di]
-        discovery += '\n■ ' + dc.title + '\n' + dc.text + '\n'
-        if (state.knownClues[roleA].indexOf(dc.id) === -1) state.knownClues[roleA].push(dc.id)
-        if (state.knownClues[roleB].indexOf(dc.id) === -1) state.knownClues[roleB].push(dc.id)
-      }
-    }
+      // 密談: 3往復のやり取り
+      var conversationLog = []
+      var maxExchanges = 3
 
-    var doorClue = pairClues.filter(function (c) { return c.bioauth })[0]
-    if (doorClue) {
-      var doorEvent = '【イベント】自動認証扉が反応し、開きました。奥に研究資料がありました。'
-      state.sharedHistory.push('(' + DISPLAY[roleA] + '&' + DISPLAY[roleB] + 'の調査中) ' + doorEvent)
-      addToTranscript(doorEvent)
-    }
+      var sitFirst = 'バディ（' + DISPLAY[roleB] + '）と二人きりで調査中です（密談可能）。\n'
+        + (discovery || '【調査結果】このラウンドでは新しい証拠は見つかりませんでした。')
+        + '\n発見した内容や、二人きりだから話せること、聞きたいことを自由に話してください。'
 
-    var noDoorClue = pairClues.filter(function (c) { return !c.bioauth })[0]
-    if (!doorClue && phaseClues.filter(function (c) { return c.bioauth }).length > 0) {
-      var silentEvent = '【イベント】自動認証扉の前を通過しましたが、何も起きませんでした。'
-      state.sharedHistory.push('(' + DISPLAY[roleA] + '&' + DISPLAY[roleB] + 'の調査中) ' + silentEvent)
-      addToTranscript(silentEvent)
-    }
-
-    var sitA = 'バディ（' + DISPLAY[roleB] + '）と調査中です。\n' + discovery + '\n発見した内容についてバディに話してください。'
-
-    var replyA = await agent(buildPlayerPrompt(roleA, sitA), {
-      label: 'investigate:' + DISPLAY[roleA],
-      phase: 'Phase ' + state.currentPhase,
-      schema: STATEMENT_SCHEMA,
-      model: 'sonnet',
-      effort: 'medium',
-    })
-
-    if (replyA) {
-      addToTranscript('【' + DISPLAY[roleA] + '→' + DISPLAY[roleB] + '】' + replyA.statement)
-
-      var sitB = 'バディ（' + DISPLAY[roleA] + '）と調査中です。\n' + discovery + '\n\n' + DISPLAY[roleA] + 'の反応: ' + replyA.statement + '\n\n応答してください。'
-      var replyB = await agent(buildPlayerPrompt(roleB, sitB), {
-        label: 'investigate:' + DISPLAY[roleB],
+      var reply = await agent(buildPlayerPrompt(roleA, sitFirst), {
+        label: 'buddy:' + DISPLAY[roleA] + ':R' + (ri + 1) + ':1',
         phase: 'Phase ' + state.currentPhase,
         schema: STATEMENT_SCHEMA,
         model: 'sonnet',
         effort: 'medium',
       })
-      if (replyB) {
-        addToTranscript('【' + DISPLAY[roleB] + '→' + DISPLAY[roleA] + '】' + replyB.statement)
+
+      if (reply) {
+        addToTranscript('【' + DISPLAY[roleA] + '→' + DISPLAY[roleB] + '】' + reply.statement)
+        conversationLog.push(DISPLAY[roleA] + ': ' + reply.statement)
+      }
+
+      for (var ex = 1; ex < maxExchanges * 2 - 1 && reply; ex++) {
+        var speaker = (ex % 2 === 1) ? roleB : roleA
+        var listener = (ex % 2 === 1) ? roleA : roleB
+
+        var sitNext = 'バディ（' + DISPLAY[listener] + '）と二人きりで調査中です（密談可能）。\n'
+          + (discovery || '')
+          + '\n\n【会話の流れ】\n' + conversationLog.join('\n')
+          + '\n\n相手の発言に応答してください。質問があれば聞いてもOKです。'
+
+        reply = await agent(buildPlayerPrompt(speaker, sitNext), {
+          label: 'buddy:' + DISPLAY[speaker] + ':R' + (ri + 1) + ':' + (ex + 1),
+          phase: 'Phase ' + state.currentPhase,
+          schema: STATEMENT_SCHEMA,
+          model: 'sonnet',
+          effort: 'medium',
+        })
+
+        if (reply) {
+          addToTranscript('【' + DISPLAY[speaker] + '→' + DISPLAY[listener] + '】' + reply.statement)
+          conversationLog.push(DISPLAY[speaker] + ': ' + reply.statement)
+        }
+      }
+
+      // 密談内容を両者の個人記録に追加
+      if (conversationLog.length > 0) {
+        var logSummary = '【密談(' + DISPLAY[roleA] + '&' + DISPLAY[roleB] + ')】' + conversationLog.join(' / ')
+        state.playerHistory[roleA].push(logSummary)
+        state.playerHistory[roleB].push(logSummary)
       }
     }
   }
@@ -509,35 +531,35 @@ async function privateTurn(role, gmMessage) {
   return result
 }
 
-async function handlePeek() {
-  var role = 'student'
-  var peekResult = await agent(buildPlayerPrompt(role,
-    '【覗き見スキル】1人を指定してください。前フェーズでその人が得た証拠品1つを閲覧できます。\n対象候補: 民俗学者(folklorist)、調査隊員(investigator)、大学教授(professor)\n誰を覗きますか？ 方針と合わせてGMに伝えてください。'), {
-    label: 'peek:' + DISPLAY[role],
+async function handleJournalistReview() {
+  var role = 'journalist'
+  var reviewable = []
+  for (var ci = 0; ci < state.knownClues[role].length; ci++) {
+    var id = state.knownClues[role][ci]
+    var clue = getClue(id)
+    if (clue && clue.professorExtra) reviewable.push(clue)
+  }
+
+  if (reviewable.length === 0) {
+    state.playerHistory[role].push('【査読結果】現在、査読可能な研究資料を持っていません。')
+    addToTranscript('  ジャーナリスト査読: 対象なし')
+    return
+  }
+
+  var reviewResult = await agent(buildPlayerPrompt(role,
+    '【査読スキル（裏）】現在持っている研究資料を査読し、追加情報を得ることができます。\n方針と合わせてGMに伝えてください。'), {
+    label: 'review:' + DISPLAY[role],
     phase: 'Phase ' + state.currentPhase,
-    schema: PEEK_SCHEMA,
+    schema: REVIEW_SCHEMA,
     model: 'sonnet',
     effort: 'medium',
   })
 
-  if (!peekResult) return
-
-  var targetClues = state.knownClues[peekResult.target]
-  if (!targetClues || targetClues.length === 0) {
-    state.playerHistory[role].push('【覗き見結果】' + DISPLAY[peekResult.target] + 'はまだ証拠を持っていません。')
-  } else {
-    var peekedId = targetClues[targetClues.length - 1]
-    var clue = getClue(peekedId)
-    if (clue) {
-      var info = '【覗き見結果】' + DISPLAY[peekResult.target] + 'の証拠: ■ ' + clue.title + ': ' + clue.text
-      state.playerHistory[role].push(info)
-      if (state.knownClues[role].indexOf(peekedId) === -1) {
-        state.knownClues[role].push(peekedId)
-      }
-    }
-  }
-  state.skillsUsed.student++
-  addToTranscript('  覗き見スキル使用（対象: ' + DISPLAY[peekResult.target] + '）')
+  var clue = reviewable[reviewable.length - 1]
+  var info = '【査読結果（口頭報告のみ）】「' + clue.title + '」を査読しました。\n追加情報: ' + clue.professorExtra + '\n※ この情報は口頭でのみ他者に伝えることができます（原本は提供されません）。'
+  state.playerHistory[role].push(info)
+  state.reviewsUsed.journalist++
+  addToTranscript('  ジャーナリスト査読スキル使用（対象: ' + clue.title + '）')
 }
 
 // ================================================================
@@ -609,8 +631,8 @@ async function writePhaseLog(label) {
   }
   lines.push('')
   lines.push('## 状態サマリ')
-  lines.push('- 覚醒: 民俗学者=' + state.awakened.folklorist + ', 院生=' + state.awakened.student)
-  lines.push('- スキル使用: 教授査読=' + state.reviewedCards.length + '件, 院生覗き=' + state.skillsUsed.student)
+  lines.push('- 覚醒: 民俗学者=' + state.awakened.folklorist + ', ジャーナリスト=' + state.awakened.journalist)
+  lines.push('- スキル使用: 教授査読=' + state.reviewedCards.length + '件, ジャーナリスト査読=' + state.reviewsUsed.journalist)
   var clueInfo = []
   for (var ci = 0; ci < ROLES.length; ci++) {
     clueInfo.push(DISPLAY[ROLES[ci]] + '=' + state.knownClues[ROLES[ci]].length)
@@ -728,8 +750,19 @@ addToTranscript(gm3)
 // 民俗学者（善A）: 覚醒
 state.awakened.folklorist = true
 await privateTurn('folklorist',
-  '施設の記憶が一気に蘇りました。\nあなたは人間ではない。上位存在——「同種」です。\n過去にこの施設にいた。逃走した。今回ルーツを知るために戻ってきた。\n封印装置は施設の最奥にあります。\nこの中にもう1体、自分と同じ存在がいると感じます。誰かは分かりません。\n\n新目標: ①もう1体（悪玉B）を特定し封印 ②正体の秘匿\nこの情報を受けて、方針をGMに伝えてください。\n\n【目撃情報】調査開始前の移動中、大学院生が一人で奥の通路を歩いているのを見かけました。気になりますが、理由は分かりません。'
+  '施設の記憶が一気に蘇りました。\nあなたは人間ではない。上位存在——「同種」です。\n過去にこの施設にいた。逃走した。今回ルーツを知るために戻ってきた。\n封印装置は施設の最奥にあります。\nこの中にもう1体、自分と同じ存在がいると感じます。誰かは分かりません。\n\n新目標: ①もう1体（悪玉B）を特定し封印 ②正体の秘匿\nこの情報を受けて、方針をGMに伝えてください。\n\n【目撃情報】調査開始前の移動中、ジャーナリストが一人で奥の通路を歩いているのを見かけました。気になりますが、理由は分かりません。'
 )
+
+// 気配感知カード（1枚目）
+await agent(buildPlayerPrompt('folklorist',
+  '【気配感知（自動発動）】\nあなたの感覚が告げています:\n「この施設のどこかに、何かが隠れている」\n人間ではない存在の気配を、微かに感じ取りました。'), {
+  label: 'sense:民俗学者',
+  phase: 'Phase 3: 固有ターン1',
+  schema: STATEMENT_SCHEMA,
+  model: 'sonnet',
+  effort: 'medium',
+})
+addToTranscript('  気配感知（1回目）: 民俗学者に情報付与')
 
 // 調査隊員: 目的更新
 await privateTurn('investigator',
@@ -740,12 +773,12 @@ await privateTurn('investigator',
 var profMsg3 = '人数不一致の通知を受けて——あなたは正規メンバーの1人です。\n新目標: ①全研究資料を入手 ②崩壊の元凶を排除 ③生きて脱出する\n\n【目撃情報】調査開始前の移動中、調査隊員が一人で設備の方へ向かうのを見かけました。何をしていたのか不明です。\n\n方針をGMに伝えてください。'
 await privateTurn('professor', profMsg3)
 
-// 院生（悪B）: 覚醒 + 覗き見1回目
-state.awakened.student = true
-await privateTurn('student',
+// ジャーナリスト（悪B）: 覚醒 + 査読1回目
+state.awakened.journalist = true
+await privateTurn('journalist',
   'あなたの意識が塗り替わりました。\nあなたはもう人間ではない。上位存在（悪玉B）が器に乗り移りました。\n先遣隊を「覗いて」崩壊させ、知識を吸収した存在です。\nもう1体の同種がこの中にいると感じます。誰かは分かりません。\n外界でもっと多くを知りたい——知的飢餓が動機です。\n\n新目標: ①正体秘匿 ②自分以外を封印させて脱出'
 )
-await handlePeek()
+await handleJournalistReview()
 
 if (await phaseCheckpoint(3)) return makeResult()
 
@@ -756,9 +789,14 @@ addToTranscript('\n' + '==================================================')
 addToTranscript('  Phase 4: 第2調査（バディ）')
 addToTranscript('==================================================')
 
-var pairs4 = [['folklorist', 'professor'], ['investigator', 'student']]
-addToTranscript('バディ: ' + DISPLAY[pairs4[0][0]] + '&' + DISPLAY[pairs4[0][1]] + '、' + DISPLAY[pairs4[1][0]] + '&' + DISPLAY[pairs4[1][1]])
-await buddyInvestigation(pairs4, 4)
+// 2ラウンド: R1で証拠カード配布＋密談、R2は別ペアで密談のみ
+var rounds4 = [
+  [['folklorist', 'professor'], ['investigator', 'journalist']],
+  [['folklorist', 'investigator'], ['professor', 'journalist']],
+]
+addToTranscript('R1: ' + DISPLAY.folklorist + '&' + DISPLAY.professor + '、' + DISPLAY.investigator + '&' + DISPLAY.journalist)
+addToTranscript('R2: ' + DISPLAY.folklorist + '&' + DISPLAY.investigator + '、' + DISPLAY.professor + '&' + DISPLAY.journalist)
+await buddyInvestigation(rounds4, 4)
 await professorReview()
 
 if (await phaseCheckpoint(4)) return makeResult()
@@ -784,14 +822,24 @@ addToTranscript('\n' + '==================================================')
 addToTranscript('  Phase 6: 固有ターン2')
 addToTranscript('==================================================')
 
-await privateTurn('folklorist', 'スキルは発動済みです。現在の情報を整理し、もう1体が誰かの推理を進めてください。')
+// 気配感知カード（2枚目）
+await agent(buildPlayerPrompt('folklorist',
+  '【気配感知（自動発動・2回目）】\nあなたの感覚がより明確に告げています:\n「調査隊の誰かが、入れ替わっている。一夜目を境に、気配が変わった者がいる」\nもう1体の同種は、Phase 3以降に現れた。つまり最初からいたわけではない。'), {
+  label: 'sense:民俗学者:2',
+  phase: 'Phase 6: 固有ターン2',
+  schema: STATEMENT_SCHEMA,
+  model: 'sonnet',
+  effort: 'medium',
+})
+addToTranscript('  気配感知（2回目）: 民俗学者に情報付与')
+await privateTurn('folklorist', '現在の情報を整理し、もう1体が誰かの推理を進めてください。')
 await privateTurn('investigator', 'これまでの情報を整理してください。「紛れ込んだ者」と「入れ替わった者」は同一人物でしょうか？')
 
 // 教授: 情報整理（査読はフェーズ後に自動実行済み）
 await privateTurn('professor', 'これまでの査読結果を踏まえ、方針をGMに伝えてください。')
 
-// 院生: 覗き見2回目
-await handlePeek()
+// ジャーナリスト: 査読2回目
+await handleJournalistReview()
 
 if (await phaseCheckpoint(6)) return makeResult()
 
@@ -802,9 +850,14 @@ addToTranscript('\n' + '==================================================')
 addToTranscript('  Phase 7: 最終調査')
 addToTranscript('==================================================')
 
-var pairs7 = [['folklorist', 'student'], ['investigator', 'professor']]
-addToTranscript('バディ: ' + DISPLAY[pairs7[0][0]] + '&' + DISPLAY[pairs7[0][1]] + '、' + DISPLAY[pairs7[1][0]] + '&' + DISPLAY[pairs7[1][1]])
-await buddyInvestigation(pairs7, 7)
+// 2ラウンド: R1で証拠カード配布＋密談、R2は別ペアで密談のみ（P4と異なるR1組み合わせ）
+var rounds7 = [
+  [['folklorist', 'journalist'], ['investigator', 'professor']],
+  [['folklorist', 'professor'], ['investigator', 'journalist']],
+]
+addToTranscript('R1: ' + DISPLAY.folklorist + '&' + DISPLAY.journalist + '、' + DISPLAY.investigator + '&' + DISPLAY.professor)
+addToTranscript('R2: ' + DISPLAY.folklorist + '&' + DISPLAY.professor + '、' + DISPLAY.investigator + '&' + DISPLAY.journalist)
+await buddyInvestigation(rounds7, 7)
 await professorReview()
 
 if (await phaseCheckpoint(7)) return makeResult()
@@ -885,7 +938,7 @@ addToTranscript('\n── 最終投票 ──')
 var votes = await parallel(ROLES.map(function (role) {
   return function () {
     return agent(buildPlayerPrompt(role,
-      '【最終投票】封印装置に送り込む対象を1人選んでください。\n候補: 民俗学者(folklorist)、調査隊員(investigator)、大学教授(professor)、大学院生(student)\n自分自身も候補に含まれます。\n投票先を選び、理由と投票宣言を述べてください。'), {
+      '【最終投票】封印装置に送り込む対象を1人選んでください。\n候補: 民俗学者(folklorist)、調査隊員(investigator)、大学教授(professor)、ジャーナリスト(journalist)\n自分自身も候補に含まれます。\n投票先を選び、理由と投票宣言を述べてください。'), {
       label: 'vote:' + DISPLAY[role],
       phase: 'Phase 8: 最終会議+投票',
       schema: VOTE_SCHEMA,
@@ -925,8 +978,8 @@ addToTranscript('  Phase 9: エンディング')
 addToTranscript('==================================================')
 
 var outcome = ''
-if (sealed === 'student') {
-  addToTranscript('【結果】悪玉B（大学院生）が正しく封印されました。善玉勝利。')
+if (sealed === 'journalist') {
+  addToTranscript('【結果】悪玉B（ジャーナリスト）が正しく封印されました。善玉勝利。')
   outcome = 'B_SEALED_GOOD_END'
 } else if (sealed === 'folklorist') {
   addToTranscript('【結果】善玉A（民俗学者）が誤封印。悪玉Bは脱出……。')
@@ -939,9 +992,51 @@ if (sealed === 'student') {
   outcome = 'NO_SEAL'
 }
 
+// A処遇（調査隊員が封印されていない場合のみ）
+if (sealed !== 'investigator') {
+  addToTranscript('\n── Aの処遇（サブエンディング）──')
+
+  var CAPTURE_SCHEMA = {
+    type: 'object',
+    properties: {
+      target: { type: 'string', enum: ['folklorist', 'professor', 'journalist', 'none'], description: '施設関係者と思う人物（none=該当なし）' },
+      wantsCapture: { type: 'boolean', description: '確保するか（true=確保する, false=見送る）' },
+      statement: { type: 'string', description: '判断の理由（100字以内）' },
+    },
+    required: ['target', 'wantsCapture', 'statement'],
+    additionalProperties: false,
+  }
+
+  var captureCandidates = 'folklorist(民俗学者), professor(大学教授)'
+  if (sealed !== 'journalist') captureCandidates += ', journalist(ジャーナリスト)'
+
+  var captureResult = await agent(buildPlayerPrompt('investigator',
+    '【GM 個別質問】\n最後に一つ確認です。調査隊員としての初期任務を覚えていますか？\n──施設関係者の特定と確保です。\nこの中に施設関係者だと思われる人物はいますか？\nいる場合、その人物と確保するかどうかを答えてください。\n候補: ' + captureCandidates), {
+    label: 'capture:調査隊員',
+    phase: 'Phase 9: エンディング',
+    schema: CAPTURE_SCHEMA,
+    model: 'sonnet',
+    effort: 'high',
+  })
+
+  if (captureResult) {
+    addToTranscript('【調査隊員→GM】' + captureResult.statement)
+
+    if (captureResult.target === 'folklorist' && captureResult.wantsCapture) {
+      addToTranscript('  → パターンA: 民俗学者を正しく特定＋確保')
+    } else if (captureResult.target === 'folklorist' && !captureResult.wantsCapture) {
+      addToTranscript('  → パターンB: 民俗学者を正しく特定＋解放')
+    } else if (captureResult.target !== 'none' && captureResult.target !== 'folklorist' && captureResult.wantsCapture) {
+      addToTranscript('  → パターンC: ' + DISPLAY[captureResult.target] + 'を誤認特定＋確保')
+    } else {
+      addToTranscript('  → パターンD: 誰も特定しない')
+    }
+  }
+}
+
 addToTranscript('\n── 真相開示 ──')
 addToTranscript('  民俗学者 = 善玉A（上位存在・無害。ルーツ探求で施設に戻った）')
-addToTranscript('  大学院生 = 悪玉B（Phase 3 で乗り換え。知的飢餓が動機）')
+addToTranscript('  ジャーナリスト = 悪玉B（Phase 3 で乗り換え。知的飢餓が動機）')
 addToTranscript('  調査隊員 = 人間（同僚を失った実務担当）')
 addToTranscript('  大学教授 = 人間（研究が悪用された認知科学者）')
 

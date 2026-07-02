@@ -43,7 +43,7 @@ udonarium_test/
 | `char_pc1.zip` | character | PC1 民俗学者（巻物アイコン） | 〃 |
 | `char_pc2.zip` | character | PC2 調査隊員（懐中電灯） | 〃 |
 | `char_pc3.zip` | character | PC3 大学教授（角帽） | 〃 |
-| `char_pc4.zip` | character | PC4 大学院生（本） | 〃 |
+| `char_pc4.zip` | character | PC4 科学ジャーナリスト（本） | 〃 |
 | `clue_card.zip` | card | 裏表カードのサンプル（front/back両面とも自前画像） | 〃 |
 
 - 駒は **正体（善A/悪B）を出さず職種のみ**。ステータス・チャットパレットは無し（detailは空ノード）。

@@ -136,7 +136,7 @@ def draw_icon(d, cx, cy, kind, color):
         d.line([(cx, cy + 28), (cx, cy + 64)], fill=color, width=5)
         d.line([(cx, cy + 64), (cx + 40, cy + 64)], fill=color, width=5)
         d.line([(cx - 40, cy - 5), (cx - 40, cy + 60)], fill=color, width=5)
-    elif kind == "book":  # 大学院生：開いた本
+    elif kind == "book":  # ジャーナリスト：開いた本
         d.line([(cx, cy - 50), (cx, cy + 60)], fill=color, width=5)
         for s in (-1, 1):
             d.polygon([(cx, cy - 50), (cx + s * 90, cy - 34),
@@ -270,7 +270,7 @@ def main():
         (1, "民俗学者", "想起", "scroll", (122, 92, 50)),
         (2, "調査隊員", "開錠", "flashlight", (54, 96, 120)),
         (3, "大学教授", "査読", "cap", (92, 70, 112)),
-        (4, "大学院生", "覗き見", "book", (112, 78, 78)),
+        (4, "ジャーナリスト", "査読", "book", (112, 78, 78)),
     ]
     char_zips = []
     for pc_no, role, skill, kind, color in ROLE_DEFS:

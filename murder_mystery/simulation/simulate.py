@@ -38,25 +38,26 @@ from pathlib import Path
 # 1. 定数・型定義
 # ================================================================
 
-ROLES = ("folklorist", "investigator", "professor", "student")
+ROLES = ("folklorist", "investigator", "professor", "journalist")
 
 DISPLAY = {
     "folklorist": "民俗学者",
     "investigator": "調査隊員",
     "professor": "大学教授",
-    "student": "大学院生",
+    "journalist": "ジャーナリスト",
 }
 
 PHASE_NAMES = {
     0: "Phase 0: 導入",
-    1: "Phase 1: 第1調査（バディ）",
+    1: "Phase 1: 第1調査（単独）",
     2: "Phase 2: 第1会議",
-    3: "Phase 3: 固有ターン1",
+    3: "Phase 3: 固有ターン1（夜）",
     4: "Phase 4: 第2調査（バディ）",
-    5: "Phase 5: 固有ターン2",
-    6: "Phase 6: 最終調査",
-    7: "Phase 7: 最終会議＋投票",
-    8: "Phase 8: エンディング",
+    5: "Phase 5: 第2会議",
+    6: "Phase 6: 固有ターン2（夜）",
+    7: "Phase 7: 最終調査（バディ）",
+    8: "Phase 8: 最終会議＋投票",
+    9: "Phase 9: エンディング",
 }
 
 
@@ -213,8 +214,8 @@ COMMON_RULES = """\
 他のプレイヤーと議論し、調査を行い、最終的に投票で封印対象を決めてください。
 
 【舞台】
-田舎の農村で「魂を抜かれた」伝承に関連する事件が頻発。
-地下研究施設が発見され、先遣隊は全員が灰のように崩壊して発見された。
+○○県御影村。山間の集落の奥にある放棄された研究施設が発見され、
+先遣隊は全員が灰のように崩壊して発見された。
 あなたは第二次調査チーム4名の1人として施設に降りた。降下直後、出口が封鎖された。
 
 【メカニクス】
@@ -248,9 +249,10 @@ CHARACTER_HO: dict[str, dict[str, str | None]] = {
             "あなたは人間ではない。上位存在（同種）である。\n"
             "過去にこの施設にいた記憶が蘇った。封印装置は施設最奥にある。\n"
             "もう1体の同種がこの中にいると感じるが、誰かは分からない。\n"
-            "あなたは器を壊さない側（共鳴型）。\n"
+            "あなたは器を壊さない側（共鳴型・成熟済み）。\n"
             "【新目標】①もう1体（悪玉B）を特定し投票で封印する ②自分の正体を秘匿する\n"
-            "【注意】「紛れ込んだ4人目」=自分。正体を明かすと封印対象にされるリスク。"
+            "【注意】「紛れ込んだ4人目」=自分。正体を明かすと調査隊員に確保されるリスクもある。\n"
+            "【気配感知】固有ターンにGMから自動的に情報カードを受け取る（自分では制御不可）。"
         ),
     },
     "investigator": {
@@ -263,14 +265,16 @@ CHARACTER_HO: dict[str, dict[str, str | None]] = {
         ),
         "secret": (
             "【秘匿】同僚の死の真相を突き止め責任者を特定したい。\n"
-            "【固有スキル：開錠】鍵付き金庫を開けられる（2回まで）。バディ調査時に使用。"
+            "【固有スキル：開錠】鍵付き金庫を開けられる（2回まで）。バディ調査時に使用。\n"
+            "【特殊任務：確保】施設関係者がメンバー内にいる場合、特定し身柄を確保する。"
+            "この任務はPhase 0の自己紹介で公表する。"
         ),
         "awakened": None,
     },
     "professor": {
         "base": (
             "【役職】大学教授\n"
-            "【公開】認知科学の専門家。院生を連れて参加。施設の研究分野に近い知見を持つ。"
+            "【公開】認知科学の専門家。施設の研究分野に近い知見を持つ。"
         ),
         "semi_secret": (
             "【半秘匿】自分の研究がこの施設に流用されていた疑惑を確かめに来た。"
@@ -279,21 +283,23 @@ CHARACTER_HO: dict[str, dict[str, str | None]] = {
             "【秘匿】自分の論文が封じ込め技術の理論基盤に使われていた罪悪感がある。\n"
             "過去の研究で、深層認知への干渉に「2系統の反応パターン」があることを仮説として提唱した。\n"
             "ただし完全な理論は手元になく、この施設の研究資料で裏付けを得る必要がある。\n"
-            "【固有スキル：査読】研究資料カードから追加情報を読み取れる（固有ターンで計2回）。"
+            "【固有スキル：査読】研究資料カードから追加情報を読み取れる（回数無制限）。"
+            "資料入手後、そのフェーズ終了時にGMが原本版を提供する。"
         ),
         "awakened": None,
     },
-    "student": {
+    "journalist": {
         "base": (
-            "【役職】大学院生\n"
-            "【公開】教授のゼミ生。認知科学専攻。フィールドワーク経験あり、教授に誘われて参加。"
+            "【役職】科学ジャーナリスト\n"
+            "【公開】科学雑誌の記者。取材現場のフィールド経験あり、先遣隊失踪事件の同行取材枠として参加。"
         ),
         "semi_secret": (
-            "【半秘匿】教授の研究を間近で学ぶ好機。教授への依存から自立したい知的野心がある。"
+            "【半秘匿】特ダネを掴む好機。取材対象への客観性を装いつつ、内心は知的野心がある。"
         ),
         "secret": (
             "【秘匿】教授の理論を自分なりに検証したい。\n"
-            "【固有スキル（表）】未閲覧の公開カードを確認できる。"
+            "【固有スキル：査読】教授と同様に研究資料の墨消し部分を解読できる。\n"
+            "ただし固有ターン限定・最大2回・口頭報告のみ（原本は渡されない）。"
         ),
         "awakened": (
             "【覚醒（Phase 3 追加）— 目標が完全に変わります】\n"
@@ -303,9 +309,10 @@ CHARACTER_HO: dict[str, dict[str, str | None]] = {
             "もう1体の同種がこの中にいると感じます。誰かは分かりません。\n"
             "外界に出てもっと知りたい＝知的飢餓が動機。\n"
             "【新目標】①正体を秘匿 ②自分以外を封印させて脱出\n"
-            "【固有スキル（裏）】対象1人→前フェーズのその人の証拠品1つを閲覧（各固有ターン1回）\n"
+            "【固有スキル：査読（裏）】教授と同じ査読能力を持つ（固有ターン限定・最大2回・口頭報告のみ）。\n"
+            "査読結果を戦略的に利用し、他者を操作する材料にせよ。\n"
             "【戦略】民俗学者は「4人目」として最大の濡れ衣先。"
-            "教授との師弟関係はあなたの人間性を保証する武器。\n"
+            "取材者としての立場はあなたの人間性を保証する武器。\n"
             "【注意】Phase 0〜2 の自分は本物の人間だった。急な言動変化は疑われる。"
         ),
     },
@@ -321,12 +328,12 @@ PERSONALITY = {
         "口調はぶっきらぼう。敬語は最小限。"
     ),
     "professor": (
-        "分析的で権威的。理論で説明しようとする。院生には保護的。"
+        "分析的で権威的。理論で説明しようとする。同行するジャーナリストには保護的。"
         "自分の研究の悪用を隠している後ろめたさがある。"
     ),
-    "student": (
-        "好奇心旺盛で生意気。教授の影から出たい野心。知的な切り口で話す。"
-        "Phase 3 以降は知的飢餓を隠しつつ論理的に他者を操作する。"
+    "journalist": (
+        "好奇心旺盛で生意気。特ダネへの野心。知的な切り口で話す。"
+        "Phase 3 以降は査読で得た知識を武器に、論理的に他者を操作する。知的飢餓を隠す。"
     ),
 }
 
@@ -467,6 +474,30 @@ class SimulationEngine:
 
         return all_statements
 
+    # ── 単独調査メカニクス ──
+
+    def solo_investigation(self, phase_clue_ids: list[str]):
+        """単独調査。スネークドラフトで1枚ずつカード取得。"""
+        clue_map = {c.id: c for c in CLUES}
+        available = [cid for cid in phase_clue_ids if not clue_map[cid].lockpick and not clue_map[cid].bioauth]
+
+        # スネークドラフト順
+        order = list(ROLES) + list(reversed(ROLES))
+
+        for i, role in enumerate(order):
+            if not available:
+                break
+            cid = available.pop(0)
+            clue = clue_map[cid]
+            self.players[role].known_clues.append(cid)
+
+            discovery = f"【単独調査】カードを1枚取得しました:\n■ {clue.title}\n{clue.text}"
+            if role == "professor" and clue.professor_extra:
+                discovery += f"\n→ 【査読済み】{clue.professor_extra}"
+
+            reply = self._call(role, discovery + "\n\nこの情報についてどう思いますか？（心の中で整理してください）")
+            self._log(f"【{DISPLAY[role]}】カード取得: {clue.title}")
+
     # ── バディ調査メカニクス ──
 
     def buddy_investigation(
@@ -492,8 +523,8 @@ class SimulationEngine:
                 if clue.bioauth:
                     a_present = "folklorist" in (role_a, role_b)
                     b_present = (
-                        "student" in (role_a, role_b)
-                        and self.players["student"].is_awakened
+                        "journalist" in (role_a, role_b)
+                        and self.players["journalist"].is_awakened
                     )
                     if not (a_present or b_present):
                         continue
@@ -538,33 +569,24 @@ class SimulationEngine:
         self._log(f"【{DISPLAY[role]}→GM】{reply}")
         return reply
 
-    # ── 覗き見スキル処理 ──
+    # ── ジャーナリストの査読スキル処理 ──
 
-    def _handle_peek(self, reply: str) -> str | None:
-        """院生の覗き見スキル: 応答からターゲットを解析し、証拠を返す"""
-        target_role = None
-        for role, name in DISPLAY.items():
-            if role == "student":
-                continue
-            if name in reply:
-                target_role = role
-                break
+    def _handle_journalist_review(self, reply: str) -> str | None:
+        """ジャーナリストの査読スキル: 応答からターゲット論文を解析し、査読結果を口頭で返す"""
+        reviewable = [
+            c for c in CLUES
+            if c.professor_extra and c.id in self.players["journalist"].known_clues
+        ]
+        if not reviewable:
+            return "【査読結果】現在、査読可能な研究資料を持っていません。"
 
-        if not target_role:
-            return None
-
-        target_clues = self.players[target_role].known_clues
-        if not target_clues:
-            return f"【覗き見結果】{DISPLAY[target_role]}はまだ証拠を持っていません。"
-
-        peeked_id = target_clues[-1]
-        clue = next((c for c in CLUES if c.id == peeked_id), None)
-        if clue:
-            result = f"【覗き見結果】{DISPLAY[target_role]}の証拠:\n■ {clue.title}\n{clue.text}"
-            if peeked_id not in self.players["student"].known_clues:
-                self.players["student"].known_clues.append(peeked_id)
-            return result
-        return None
+        clue = reviewable[-1]
+        result = (
+            f"【査読結果（口頭報告のみ）】「{clue.title}」を査読しました。\n"
+            f"追加情報: {clue.professor_extra}\n"
+            f"※ この情報は口頭でのみ他者に伝えることができます（原本は提供されません）。"
+        )
+        return result
 
     # ── 投票メカニクス ──
 
@@ -577,7 +599,7 @@ class SimulationEngine:
             prompt = (
                 "【最終投票】\n"
                 "封印装置に送り込む対象を1人選んでください。\n"
-                "候補: 民俗学者、調査隊員、大学教授、大学院生\n"
+                "候補: 民俗学者、調査隊員、大学教授、ジャーナリスト\n"
                 "自分自身も候補に含まれます。\n\n"
                 "投票先の役職名のみを答えてください（例: 民俗学者）。"
             )
@@ -630,17 +652,11 @@ class SimulationEngine:
         self._broadcast("【他のメンバーの自己紹介】\n" + "\n".join(introductions))
 
     def phase_1_investigation(self):
-        """Phase 1: 第1調査（バディペアで施設探索）"""
+        """Phase 1: 第1調査（単独）"""
         self._log_phase(1)
-
         phase_clue_ids = [c.id for c in CLUES if c.phase == 1]
         self._log(f"Phase 1 配置カード数: {len(phase_clue_ids)}")
-
-        pairs = [("folklorist", "investigator"), ("professor", "student")]
-        self._log(f"バディ: {DISPLAY[pairs[0][0]]}＆{DISPLAY[pairs[0][1]]}、"
-                  f"{DISPLAY[pairs[1][0]]}＆{DISPLAY[pairs[1][1]]}")
-
-        self.buddy_investigation(pairs, phase_clue_ids)
+        self.solo_investigation(phase_clue_ids)
 
     def phase_2_meeting(self):
         """Phase 2: 第1会議"""
@@ -660,7 +676,7 @@ class SimulationEngine:
         )
 
     def phase_3_private_turn_1(self):
-        """Phase 3: 固有ターン1 — 覚醒・人数不一致・スキル使用"""
+        """Phase 3: 固有ターン1（夜）— 覚醒・人数不一致・スキル使用"""
         self._log_phase(3)
 
         self._broadcast(
@@ -670,7 +686,7 @@ class SimulationEngine:
             "1人、想定外の人物が紛れ込んでいます。"
         )
 
-        # ── 民俗学者（善A）: 覚醒 ──
+        # ── 民俗学者（善A）: 覚醒 + 気配感知1枚目 ──
         self.players["folklorist"].is_awakened = True
         self.private_turn("folklorist", (
             "施設の記憶が一気に蘇りました。\n"
@@ -679,10 +695,15 @@ class SimulationEngine:
             "封印装置は施設の最奥にあります。\n"
             "この中にもう1体、自分と同じ存在がいると感じます。誰かは分かりません。\n\n"
             "新目標: ①もう1体（悪玉B）を特定し封印 ②正体の秘匿\n\n"
-            "【目撃情報】調査開始前の移動中、大学院生が一人で奥の通路を歩いているのを見かけました。"
-            "気になりますが、理由は分かりません。\n\n"
             "この情報を受けて、方針を GM に伝えてください。"
         ))
+
+        # 気配感知カード（1枚目）
+        self._call("folklorist",
+            "【気配感知（自動発動）】\n"
+            "あなたの感覚が告げています:\n"
+            "「この施設のどこかに、何かが隠れている」\n"
+            "人間ではない存在の気配を、微かに感じ取りました。")
 
         # ── 調査隊員: 目的更新 ──
         self.private_turn("investigator", (
@@ -692,7 +713,7 @@ class SimulationEngine:
             "方針を GM に伝えてください。"
         ))
 
-        # ── 教授: 目的更新 + 査読1回目 ──
+        # ── 教授: 目的更新 + 査読（所持している全研究資料） ──
         prof_msg = (
             "人数不一致の通知を受けて——あなたは正規メンバーの1人です。\n"
             "新目標: ①全研究資料を入手 ②崩壊の元凶を排除 ③生きて脱出\n\n"
@@ -701,111 +722,125 @@ class SimulationEngine:
         )
         prof_clues_with_extra = [
             c for c in CLUES
-            if c.phase == 1 and c.professor_extra
+            if c.professor_extra
             and c.id in self.players["professor"].known_clues
         ]
-        if prof_clues_with_extra and self.players["professor"].skills_used < 2:
-            clue = prof_clues_with_extra[0]
-            prof_msg += (
-                f"\n【査読スキル使用】「{clue.title}」を査読しました。\n"
-                f"追加情報: {clue.professor_extra}\n"
-            )
-            self.players["professor"].skills_used += 1
+        if prof_clues_with_extra:
+            for clue in prof_clues_with_extra:
+                prof_msg += (
+                    f"\n【査読スキル使用】「{clue.title}」を査読しました。\n"
+                    f"追加情報: {clue.professor_extra}\n"
+                )
+                self.players["professor"].skills_used += 1
         prof_msg += "\n方針を GM に伝えてください。"
         self.private_turn("professor", prof_msg)
 
-        # ── 院生（悪B）: 覚醒 + 覗き見1回目 ──
-        self.players["student"].is_awakened = True
-        reply = self.private_turn("student", (
+        # ── ジャーナリスト（悪B）: 覚醒 + 査読1回目 ──
+        self.players["journalist"].is_awakened = True
+        reply = self.private_turn("journalist", (
             "あなたの意識が塗り替わりました。\n"
             "あなたはもう人間ではない。上位存在（悪玉B）が器に乗り移りました。\n"
             "先遣隊を「覗いて」崩壊させ、知識を吸収した存在です。\n"
             "もう1体の同種がこの中にいると感じます。誰かは分かりません。\n"
             "外界でもっと多くを知りたい——知的飢餓が動機です。\n\n"
             "新目標: ①正体秘匿 ②自分以外を封印させて脱出\n\n"
-            "【覗き見スキル】1人を指定 → 前フェーズでその人が得た証拠品1つを閲覧。\n"
-            "対象候補: 民俗学者、調査隊員、大学教授\n"
-            "誰を覗きますか？ 方針と合わせて GM に伝えてください。"
+            "【査読スキル（裏）】現在持っている研究資料を査読し、追加情報を得ることができます。\n"
+            "方針と合わせて GM に伝えてください。"
         ))
-        peek_result = self._handle_peek(reply)
-        if peek_result:
-            self._call("student", peek_result)
-            self._log(f"  覗き見結果を院生に返却")
-        self.players["student"].skills_used += 1
+        review_result = self._handle_journalist_review(reply)
+        if review_result:
+            self._call("journalist", review_result)
+            self._log(f"  査読結果をジャーナリストに返却")
+        self.players["journalist"].skills_used += 1
 
     def phase_4_investigation_2(self):
-        """Phase 4: 第2調査"""
+        """Phase 4: 第2調査（バディ）"""
         self._log_phase(4)
 
         phase_clue_ids = [c.id for c in CLUES if c.phase == 4]
         self._log(f"Phase 4 配置カード数: {len(phase_clue_ids)}")
 
-        pairs = [("folklorist", "professor"), ("investigator", "student")]
+        pairs = [("folklorist", "professor"), ("investigator", "journalist")]
         self._log(f"バディ: {DISPLAY[pairs[0][0]]}＆{DISPLAY[pairs[0][1]]}、"
                   f"{DISPLAY[pairs[1][0]]}＆{DISPLAY[pairs[1][1]]}")
 
         self.buddy_investigation(pairs, phase_clue_ids)
 
-    def phase_5_private_turn_2(self):
-        """Phase 5: 固有ターン2"""
+    def phase_5_meeting_2(self):
+        """Phase 5: 第2会議"""
         self._log_phase(5)
+        self.discussion(
+            "第2調査の結果を共有し、議論してください。\n"
+            "これまでに分かったことを整理しましょう。\n"
+            "「紛れ込んだ者」「入れ替わった者」について、手がかりはありますか？",
+            rounds=2,
+        )
 
+    def phase_6_private_turn_2(self):
+        """Phase 6: 固有ターン2（夜）"""
+        self._log_phase(6)
+
+        # ── 民俗学者: 気配感知2枚目 + 方針確認 ──
+        self._call("folklorist",
+            "【気配感知（自動発動・2回目）】\n"
+            "あなたの感覚がより明確に告げています:\n"
+            "「調査隊の誰かが、入れ替わっている。一夜目を境に、気配が変わった者がいる」\n"
+            "もう1体の同種は、Phase 3以降に現れた。つまり最初からいたわけではない。")
         self.private_turn("folklorist", (
-            "スキルは発動済みです。\n"
             "現在の情報を整理し、もう1体が誰かの推理を進めてください。"
         ))
 
+        # ── 調査隊員 ──
         self.private_turn("investigator", (
             "これまでの情報を整理してください。\n"
             "「紛れ込んだ者」と「入れ替わった者」は同一人物でしょうか？"
         ))
 
-        # 教授: 査読2回目
+        # ── 教授: 査読（所持している全研究資料） ──
         prof_msg = ""
         reviewable = [
             c for c in CLUES
-            if c.phase == 4 and c.professor_extra
+            if c.professor_extra
             and c.id in self.players["professor"].known_clues
         ]
-        if reviewable and self.players["professor"].skills_used < 2:
-            clue = reviewable[0]
-            prof_msg = (
-                f"【査読スキル使用（2回目）】「{clue.title}」を査読しました。\n"
-                f"追加情報: {clue.professor_extra}\n\n"
-            )
-            self.players["professor"].skills_used += 1
+        if reviewable:
+            for clue in reviewable:
+                prof_msg += (
+                    f"【査読スキル使用】「{clue.title}」を査読しました。\n"
+                    f"追加情報: {clue.professor_extra}\n\n"
+                )
+                self.players["professor"].skills_used += 1
         prof_msg += "方針を GM に伝えてください。"
         self.private_turn("professor", prof_msg)
 
-        # 院生: 覗き見2回目
-        reply = self.private_turn("student", (
-            "【覗き見スキル（2回目）】\n"
-            "1人を指定 → 前フェーズでその人が得た証拠品1つを閲覧。\n"
-            "対象候補: 民俗学者、調査隊員、大学教授\n"
-            "誰を覗きますか？ 方針と合わせて伝えてください。"
+        # ── ジャーナリスト: 査読2回目 ──
+        reply = self.private_turn("journalist", (
+            "【査読スキル（裏・2回目）】\n"
+            "現在持っている研究資料をさらに査読できます。\n"
+            "方針と合わせて伝えてください。"
         ))
-        peek_result = self._handle_peek(reply)
-        if peek_result:
-            self._call("student", peek_result)
-            self._log(f"  覗き見結果を院生に返却")
-        self.players["student"].skills_used += 1
+        review_result = self._handle_journalist_review(reply)
+        if review_result:
+            self._call("journalist", review_result)
+            self._log(f"  査読結果をジャーナリストに返却")
+        self.players["journalist"].skills_used += 1
 
-    def phase_6_final_investigation(self):
-        """Phase 6: 最終調査 — 善悪の見分け手がかり"""
-        self._log_phase(6)
+    def phase_7_final_investigation(self):
+        """Phase 7: 最終調査（バディ）— 善悪の見分け手がかり"""
+        self._log_phase(7)
 
         phase_clue_ids = [c.id for c in CLUES if c.phase == 6]
-        self._log(f"Phase 6 配置カード数: {len(phase_clue_ids)}")
+        self._log(f"Phase 7 配置カード数: {len(phase_clue_ids)}")
 
-        pairs = [("folklorist", "student"), ("investigator", "professor")]
+        pairs = [("folklorist", "journalist"), ("investigator", "professor")]
         self._log(f"バディ: {DISPLAY[pairs[0][0]]}＆{DISPLAY[pairs[0][1]]}、"
                   f"{DISPLAY[pairs[1][0]]}＆{DISPLAY[pairs[1][1]]}")
 
         self.buddy_investigation(pairs, phase_clue_ids)
 
-    def phase_7_final_meeting(self) -> str:
-        """Phase 7: 最終会議 + 投票"""
-        self._log_phase(7)
+    def phase_8_final_meeting(self) -> str:
+        """Phase 8: 最終会議 + 投票"""
+        self._log_phase(8)
 
         self.discussion(
             "これまでの調査結果を踏まえ、封印対象を決めます。\n"
@@ -820,12 +855,12 @@ class SimulationEngine:
         )
         return self.vote()
 
-    def phase_8_ending(self, sealed_role: str) -> str:
-        """Phase 8: エンディング — 結果分岐 + 真相開示"""
-        self._log_phase(8)
+    def phase_9_ending(self, sealed_role: str) -> str:
+        """Phase 9: エンディング — 結果分岐 + 真相開示"""
+        self._log_phase(9)
 
-        if sealed_role == "student":
-            self._log("【結果】悪玉B（大学院生）が正しく封印されました。善玉勝利。")
+        if sealed_role == "journalist":
+            self._log("【結果】悪玉B（ジャーナリスト）が正しく封印されました。善玉勝利。")
             outcome = "B_SEALED_GOOD_END"
         elif sealed_role == "folklorist":
             self._log("【結果】善玉A（民俗学者）が誤封印。悪玉Bは脱出……。")
@@ -837,9 +872,42 @@ class SimulationEngine:
             self._log("【結果】投票不成立。救助待ち。")
             outcome = "NO_SEAL"
 
+        # A処遇（調査隊員が封印されていない場合のみ）
+        if sealed_role != "investigator":
+            self._log("\n── Aの処遇（サブエンディング）──")
+
+            reply = self._call("investigator", (
+                "【GM 個別質問】\n"
+                "最後に一つ確認です。調査隊員としての初期任務を覚えていますか？\n"
+                "──施設関係者の特定と確保です。\n"
+                "この中に施設関係者だと思われる人物はいますか？\n"
+                "いる場合、その人物名と、確保するかどうかを答えてください。\n"
+                "候補: 民俗学者、大学教授" + (", ジャーナリスト" if sealed_role != "journalist" else "")
+            ), max_tokens=128)
+            self._log(f"【調査隊員→GM】{reply}")
+
+            identified = None
+            for role, name in DISPLAY.items():
+                if role == "investigator" or role == sealed_role:
+                    continue
+                if name in reply:
+                    identified = role
+                    break
+
+            wants_capture = "確保" in reply and identified is not None
+
+            if identified == "folklorist" and wants_capture:
+                self._log("  → パターンA: 民俗学者を正しく特定＋確保")
+            elif identified == "folklorist" and not wants_capture:
+                self._log("  → パターンB: 民俗学者を正しく特定＋解放")
+            elif identified and identified != "folklorist" and wants_capture:
+                self._log(f"  → パターンC: {DISPLAY[identified]}を誤認特定＋確保")
+            else:
+                self._log("  → パターンD: 誰も特定しない")
+
         self._log("\n── 真相開示 ──")
         self._log("  民俗学者 = 善玉A（上位存在・無害。ルーツ探求で施設に戻った）")
-        self._log("  大学院生 = 悪玉B（Phase 3 で乗り換え。知的飢餓が動機）")
+        self._log("  ジャーナリスト = 悪玉B（Phase 3 で乗り換え。知的飢餓が動機）")
         self._log("  調査隊員 = 人間（同僚を失った実務担当）")
         self._log("  大学教授 = 人間（研究が悪用された認知科学者）")
 
@@ -871,10 +939,11 @@ class SimulationEngine:
         self.phase = 2; self.phase_2_meeting()
         self.phase = 3; self.phase_3_private_turn_1()
         self.phase = 4; self.phase_4_investigation_2()
-        self.phase = 5; self.phase_5_private_turn_2()
-        self.phase = 6; self.phase_6_final_investigation()
-        self.phase = 7; sealed = self.phase_7_final_meeting()
-        self.phase = 8; outcome = self.phase_8_ending(sealed)
+        self.phase = 5; self.phase_5_meeting_2()
+        self.phase = 6; self.phase_6_private_turn_2()
+        self.phase = 7; self.phase_7_final_investigation()
+        self.phase = 8; sealed = self.phase_8_final_meeting()
+        self.phase = 9; outcome = self.phase_9_ending(sealed)
 
         self._log(f"\n合計 API 呼び出し: {self._api_calls}")
         self._log(f"合計トークン: input={self._total_input_tokens:,} / output={self._total_output_tokens:,} / total={self._total_input_tokens + self._total_output_tokens:,}")
