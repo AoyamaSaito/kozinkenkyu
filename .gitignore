@@ -13,3 +13,7 @@
 
 # Python — バイトコードキャッシュ
 __pycache__/
+
+# マダミス — GM引き継ぎパッケージ（distの複製・再生成可能）
+murder_mystery/handoff_gm/
+murder_mystery/handoff_gm.zip
