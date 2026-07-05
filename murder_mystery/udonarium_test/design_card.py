@@ -2344,7 +2344,7 @@ if __name__ == "__main__":
     make_rules().save(os.path.join(OUT, "final_rules.png"))
     make_phase_bar().save(os.path.join(OUT, "final_phase_bar.png"))
     make_action_matrix().save(os.path.join(OUT, "final_action_matrix.png"))
-    markers = [("院", (160, 50, 50)), ("民", (50, 130, 80)),
+    markers = [("記", (160, 50, 50)), ("民", (50, 130, 80)),
                ("隊", (50, 80, 160)), ("教", (110, 50, 150))]
     for ch, col in markers:
         make_marker(ch, col).save(os.path.join(OUT, f"final_marker_{ch}.png"))

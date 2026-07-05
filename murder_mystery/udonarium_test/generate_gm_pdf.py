@@ -6,8 +6,10 @@ import os
 from fpdf import FPDF
 from fpdf.enums import WrapMode
 
-INPUT_MD = r"D:\個人研究その2\murder_mystery\dist\GM専用\01_GM進行台本.md"
-OUTPUT_PDF = r"D:\個人研究その2\murder_mystery\dist\GM専用\01_GM進行台本.pdf"
+# ドライブ非依存: スクリプト位置(udonarium_test/)から dist/GM専用/ を解決
+_GM_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dist", "GM専用")
+INPUT_MD = os.path.join(_GM_DIR, "01_GM進行台本.md")
+OUTPUT_PDF = os.path.join(_GM_DIR, "01_GM進行台本.pdf")
 
 # --- Fonts ---
 YU_GOTH_B  = r"C:/Windows/Fonts/YuGothB.ttc"   # headers (gothic bold)
@@ -608,8 +610,8 @@ def main():
     print(f"     Page count : {pdf.page}")
 
     # --- Truth document (no TOC) ---
-    truth_md  = r"D:\個人研究その2\murder_mystery\dist\GM専用\02_真相編.md"
-    truth_pdf = r"D:\個人研究その2\murder_mystery\dist\GM専用\02_真相編.pdf"
+    truth_md  = os.path.join(_GM_DIR, "02_真相編.md")
+    truth_pdf = os.path.join(_GM_DIR, "02_真相編.pdf")
 
     if os.path.exists(truth_md):
         with open(truth_md, encoding="utf-8") as f:
