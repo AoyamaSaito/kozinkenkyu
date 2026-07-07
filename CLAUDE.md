@@ -13,6 +13,7 @@
 | 小説（観測者×久世朔） | ルート直下（`characters/` `world/` `narrative/` `episodes/`） | Ep2推敲中・Ep3以降未着手 | 進捗: `narrative/progress.md` |
 | マダミス1『覗きの代』 | `murder_mystery/` | 完成・改修フェーズ | `murder_mystery/CLAUDE.md` |
 | マダミス2（仮題・交渉型ホラー） | `murder_mystery_2/` | 構想段階 | `murder_mystery_2/CLAUDE.md` |
+| マダミス3『誰が剣を抜いたのか？』（仮題・異世界系） | `murder_mystery_3/` | 構想段階 | `murder_mystery_3/CLAUDE.md` |
 
 - マダミス各企画は小説とは**独立した別企画**（上位種設定のみ地続き）。小説作業時はマダミス配下の読み込み不要
 - **マダミス作業時は該当サブディレクトリで Claude を起動する**こと。子CLAUDE.mdが読み込まれ、小説側の詳細を文脈に積まずに済む
