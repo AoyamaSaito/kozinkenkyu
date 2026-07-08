@@ -49,8 +49,8 @@ murder_mystery_3/
 
 | # | 内容 | 状態 | 備考 |
 |---|------|------|------|
-| M-1 | **知識ベース確認**: basics / components / scenario_design 参照 | ☐ | 初回のみ |
-| M-2 | `scenario/00_concept.md` シナリオ概要 | 🔄 | 舞台・キャスト・システム・HO・ギミック・ED分岐。コア決定は `00_DECISIONS.md` に随時記録中 |
+| M-1 | **知識ベース確認**: basics / components / scenario_design 参照 | ✅ | 初回のみ。競合調査も実施済（異世界ファンタジー系16作品＋メカニクス系8作品） |
+| M-2 | `scenario/00_concept.md` シナリオ概要 | 🔄 | §C〜§F記載済み（システム・ギミック・ED分岐・HO方針）。コア決定は `00_DECISIONS.md` に随時記録中 |
 | M-3 | `scenario/01_truth.md` 真相編 | ☐ | 完全時系列・善悪真相・証拠対応表・ED詳細・GM注意 |
 | M-4 | `scenario/02_beatsheet.md` ビートシート | ☐ | 全Phase進行設計 |
 | M-5 | `scenario/03_info_layers.md` 情報設計 | ☐ | 段階的開示・詰み防止・消去法格子 |
