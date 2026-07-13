@@ -14,6 +14,7 @@
 | マダミス1『覗きの代』 | `murder_mystery/` | 完成・改修フェーズ | `murder_mystery/CLAUDE.md` |
 | マダミス2（仮題・交渉型ホラー） | `murder_mystery_2/` | 構想段階 | `murder_mystery_2/CLAUDE.md` |
 | マダミス3『誰が剣を抜いたのか？』（仮題・異世界系） | `murder_mystery_3/` | 構想段階 | `murder_mystery_3/CLAUDE.md` |
+| マダミス4（仮題・サイバーパンク） | `murder_mystery_4/` | 構想段階 | `murder_mystery_4/CLAUDE.md` |
 
 - マダミス各企画は小説とは**独立した別企画**（上位種設定のみ地続き）。小説作業時はマダミス配下の読み込み不要
 - **マダミス作業時は該当サブディレクトリで Claude を起動する**こと。子CLAUDE.mdが読み込まれ、小説側の詳細を文脈に積まずに済む
@@ -38,6 +39,7 @@ D:\個人研究その2\
 ├── episodes\              # 小説 WHAT — 01_邂逅 / 02_声
 ├── murder_mystery\        # 【別企画】マダミス1『覗きの代』 → 詳細は同フォルダの CLAUDE.md
 ├── murder_mystery_2\      # 【別企画】マダミス2（構想段階） → 同上
+├── murder_mystery_4\      # 【別企画】マダミス4（構想段階） → 同上
 └── ai-discussion-arena\   # 議論スキル（ai-discussion-arena）用の作業フォルダ
 ```
 
